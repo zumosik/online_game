@@ -2,7 +2,7 @@
 
 class Player : public Entity {
 public:
-    explicit Player(SDL_Texture *pTex, double speed) : Entity(Vector2f(), pTex), velocity(), speed(speed) {}
+    explicit Player(SDL_Texture *pTex, double speed) : Entity(Vector2f(), pTex, Vector2int(64,64)), velocity(), speed(speed) {}
 
     Vector2f velocity;
     double speed;

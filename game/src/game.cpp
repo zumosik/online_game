@@ -8,7 +8,7 @@ void Game::GameLoop() {
 
 
     for (int i = 0; i < 30; ++i)
-        entities.emplace_back(Vector2f(100 + (i * 32), 100), grassTexture);
+        entities.emplace_back(Vector2f(100 + (i * 32), 100), grassTexture, Vector2int(32,32));
 
 
     SDL_Event event;
