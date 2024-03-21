@@ -1,0 +1,16 @@
+github.com/vmihailenco/msgpack/v5 v5.4.1 h1:cQriyiUvjTwOHg8QZaPihLWeRAAVoCpE00IUPn0Bjt8=
+github.com/vmihailenco/msgpack/v5 v5.4.1/go.mod h1:GaZTsDaehaPpQVyxrf5mtQlH+pc21PIudVV/E3rRQok=
+github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
+github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
+github.com/zumosik/bb v0.0.0-20240316160149-2a6363cf0851 h1:OI2QXiTIpXZws5tNXHlCtgofrgNT/FM9yg0ZWeDe1Ok=
+github.com/zumosik/bb v0.0.0-20240316160149-2a6363cf0851/go.mod h1:gNzNK2CETyQnH3E9gIP8+MEKDjuS2MkpZz+BMEg+Le8=
+github.com/zumosik/bb v0.0.0-20240316162758-f9967970a3e7 h1:ySSwvMpU4T/H8ZODaVR2phhKBXjYy77laodgRxuxqeI=
+github.com/zumosik/bb v0.0.0-20240316162758-f9967970a3e7/go.mod h1:gNzNK2CETyQnH3E9gIP8+MEKDjuS2MkpZz+BMEg+Le8=
+github.com/zumosik/bb v0.0.0-20240316164310-b7022cc48804 h1:PRB9A9bFFjxz98FNpXew+YE3mYZuxYa8Io64/cqg/x4=
+github.com/zumosik/bb v0.0.0-20240316164310-b7022cc48804/go.mod h1:gNzNK2CETyQnH3E9gIP8+MEKDjuS2MkpZz+BMEg+Le8=
+github.com/zumosik/bb v0.0.0-20240316170630-6965e4f9ce1e h1:VnHIihgTbYwoZKGJM85JgufglgwM8x1fOeh6EkTIgMA=
+github.com/zumosik/bb v0.0.0-20240316170630-6965e4f9ce1e/go.mod h1:gNzNK2CETyQnH3E9gIP8+MEKDjuS2MkpZz+BMEg+Le8=
+gitlab.com/greyxor/slogor v1.2.6 h1:BrjGAaTu+dhCfMk21k1p1H/fwyDIwrdmqcXzAo11wwc=
+gitlab.com/greyxor/slogor v1.2.6/go.mod h1:pao06LIpuob9fOTPLVpvBYpRfH04D6q/SMjrF7Lhf70=
+golang.org/x/sys v0.18.0 h1:DBdB3niSjOA/O0blCZBqDefyWNYveAYMNF1Wum0DYQ4=
+golang.org/x/sys v0.18.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
