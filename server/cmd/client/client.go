@@ -119,8 +119,6 @@ func main() {
 		}
 		fmt.Println("Received:", *packet.Payload.(*server.PlayerPosResp))
 
-		vec = server.Vector{}
-
 		end := time.Now().Sub(start)
 		fmt.Println(end)
 	}
