@@ -25,10 +25,10 @@ public:
     [[nodiscard]] bool running() const {return isRunning;}
 
     static SDL_Renderer *renderer;
+    static SDL_Event event;
 private:
     bool isRunning{};
     SDL_Window *window{};
-
 };
 
 

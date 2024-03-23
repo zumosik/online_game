@@ -11,21 +11,22 @@
 
 class TransformComponent : public Component {
 public:
-    TransformComponent() {position = Vector2f();}
-    explicit TransformComponent(Vector2f pos) : position(pos){}
+    Vector2f position;
+    Vector2f velocity;
 
-    Vector2f pos() { return position;}
-    void setPos(Vector2f pos){position = pos;}
+    float speed = 3;
+
+    TransformComponent() {position = Vector2f(); }
+    explicit TransformComponent(Vector2f pos, float speed) : position(pos), speed(speed){}
+
 
     void init() override {
-        position = Vector2f();
+        velocity = Vector2f();
     }
 
     void update() override {
-        position + Vector2f(1,1);
+        position += (velocity * Vector2f(speed, speed));
     }
-private:
-    Vector2f position;
 };
 
 #endif //GAME_SDL2_TRANSFORMCOMPONENT_H

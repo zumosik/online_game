@@ -22,7 +22,7 @@ public:
     }
 
     void init() override {
-        position = &entity->getComponent<TransformComponent>();
+        transform = &entity->getComponent<TransformComponent>();
 
         srcRect.x = srcRect.y = 0;
         srcRect.w = srcRect.h = 32;
@@ -30,17 +30,16 @@ public:
     }
 
     void update() override {
-        Vector2f pos = position->pos();
 
-        dstRect.x = (int)pos.x;
-        dstRect.y = (int)pos.y;
+        dstRect.x = (int)transform->position.x;
+        dstRect.y = (int)transform->position.y;
     }
 
     void draw() override {
         TextureManager::Draw(tex, srcRect, dstRect);
     }
 private:
-    TransformComponent *position;
+    TransformComponent *transform;
     SDL_Texture * tex;
     SDL_Rect srcRect, dstRect;
 };

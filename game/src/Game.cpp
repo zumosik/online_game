@@ -17,6 +17,8 @@ SDL_Renderer* Game::renderer = nullptr;
 
 Manager manager;
 auto& newPlayer(manager.addEntity());
+SDL_Event Game::event;
+
 
 Game::Game() = default;
 Game::~Game() = default;
@@ -49,24 +51,23 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     }
 
     isRunning = true;
-
     map = new Map();
-
-    newPlayer.addComponent<TransformComponent>();
+    newPlayer.addComponent<TransformComponent>(Vector2f(), 3.5f);
     newPlayer.addComponent<SpriteComponent>("res/imgs/star.png");
+    newPlayer.addComponent<KeyboardControllerComponent>();
 }
 
 void Game::update() {
     manager.update();
 
-    std::cout << "Player pos: " << newPlayer.getComponent<TransformComponent>().pos() << std::endl;
+    std::cout << "Player pos: " << newPlayer.getComponent<TransformComponent>().position << std::endl;
 }
 
 void Game::handleEvents() {
-    SDL_Event event;
     SDL_PollEvent(&event);
     switch (event.type) {
         case SDL_QUIT:
+            std::cout << "SDL QUIT" << std::endl;
             isRunning = false;
             break;
         default:
@@ -83,6 +84,7 @@ void Game::render() {
 
 }
 void Game::clean() {
+    std::cout << "Cleaning.." << std::endl;
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();

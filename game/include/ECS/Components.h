@@ -8,5 +8,6 @@
 #include "ECS/ECS.h"
 #include "ECS/Components/SpriteComponent.h"
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/KeyboardControllerComponent.h"
 
 #endif //GAME_SDL2_COMPONENTS_H
