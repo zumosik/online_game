@@ -23,5 +23,10 @@ struct Vector2int
         std::cout << x << "," << y << std::endl;
     }
 
+    void add(Vector2int addVec) {
+        x+=addVec.x;
+        y+=addVec.y;
+    }
+
     int x,y;
 };

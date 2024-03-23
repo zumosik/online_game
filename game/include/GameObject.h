@@ -10,17 +10,16 @@
 
 class GameObject {
 public:
-    GameObject(const char* textureSheet, SDL_Renderer *ren);
+    GameObject(const char* textureSheet,  Vector2int pos);
     ~GameObject();
 
     void Update();
     void Render();
 private:
-    Vector2f pos;
+    Vector2int pos;
 
     SDL_Texture* texture;
-    SDL_Rect srcRect, dstRect;
-    SDL_Renderer * renderer;
+    SDL_Rect srcRect{}, dstRect{};
 };
 
 

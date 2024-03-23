@@ -7,8 +7,15 @@
 #include "Game.h"
 #include "TextureManager.h"
 #include "GameObject.h"
+#include "Map.h"
 
 GameObject* player;
+Map *map;
+
+SDL_Renderer* Game::renderer = nullptr;
+
+Manager manager;
+auto& newPlayer(manager.addEntity());
 
 Game::Game() = default;
 Game::~Game() = default;
@@ -42,12 +49,19 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
     isRunning = true;
 
-    player = new GameObject("res/imgs/star.png", renderer);
+    player = new GameObject("res/imgs/star.png", Vector2int(100,100));
+
+    map = new Map();
+
+    newPlayer.addComponent<TransformComponent>();
+    newPlayer.getComponent<TransformComponent>().setPos(Vector2int(500,500));
 }
 
 void Game::update() {
     player->Update();
+    manager.update();
 
+    newPlayer.getComponent<TransformComponent>().pos().print();
 }
 
 void Game::handleEvents() {
@@ -63,6 +77,8 @@ void Game::handleEvents() {
 }
 void Game::render() {
     SDL_RenderClear(renderer);
+
+    map->DrawMap();
 
     player->Render();
 

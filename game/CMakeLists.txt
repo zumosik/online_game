@@ -26,5 +26,6 @@ add_executable(game_sdl2
         src/Game.cpp
         src/textureManager.cpp
         src/GameObject.cpp
+        src/Map.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${Boost_LIBRARIES} ws2_32)
