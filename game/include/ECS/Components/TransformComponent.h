@@ -2,14 +2,18 @@
 // Created by a on 23.03.2024.
 //
 
-#ifndef GAME_SDL2_COMPONENTS_H
-#define GAME_SDL2_COMPONENTS_H
+#ifndef GAME_SDL2_TRANSFORMCOMPONENT_H
+#define GAME_SDL2_TRANSFORMCOMPONENT_H
 
-#include "ECS.h"
+#include "ECS/Components.h"
+#include "ECS/ECS.h"
 #include "Math.hpp"
 
 class TransformComponent : public Component {
 public:
+    TransformComponent() {position = Vector2int();}
+    explicit TransformComponent(Vector2int pos) : position(pos){}
+
     Vector2int pos() { return position;}
     void setPos(Vector2int pos){position = pos;}
 
@@ -24,4 +28,4 @@ private:
     Vector2int position;
 };
 
-#endif //GAME_SDL2_COMPONENTS_H
+#endif //GAME_SDL2_TRANSFORMCOMPONENT_H

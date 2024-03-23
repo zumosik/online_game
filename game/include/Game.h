@@ -8,8 +8,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-#include "ECS.h"
-#include "Components.h"
+
 
 class Game {
 public:

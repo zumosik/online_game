@@ -1,6 +1,6 @@
-//
-// Created by a on 23.03.2024.
-//
+// E - entity
+// C - component
+// S - system
 
 #ifndef GAME_SDL2_ECS_H
 #define GAME_SDL2_ECS_H
@@ -48,9 +48,10 @@ class Entity {
 public:
     void update() {
         for (auto& c: components) c->update();
+    }
+    void draw() {
         for (auto& c: components) c->draw();
     }
-    void draw() {}
     bool isActive() const {return active;}
     void destroy() {active = false;}
 

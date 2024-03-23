@@ -3,13 +3,15 @@
 //
 
 #include <iostream>
-
-#include "Game.h"
 #include "TextureManager.h"
+#include "Game.h"
 #include "GameObject.h"
 #include "Map.h"
 
-GameObject* player;
+#include "ECS/ECS.h"
+#include "ECS/Components.h"
+
+
 Map *map;
 
 SDL_Renderer* Game::renderer = nullptr;
@@ -49,16 +51,13 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
     isRunning = true;
 
-    player = new GameObject("res/imgs/star.png", Vector2int(100,100));
-
     map = new Map();
 
     newPlayer.addComponent<TransformComponent>();
-    newPlayer.getComponent<TransformComponent>().setPos(Vector2int(500,500));
+    newPlayer.addComponent<SpriteComponent>("res/imgs/star.png");
 }
 
 void Game::update() {
-    player->Update();
     manager.update();
 
     newPlayer.getComponent<TransformComponent>().pos().print();
@@ -79,8 +78,7 @@ void Game::render() {
     SDL_RenderClear(renderer);
 
     map->DrawMap();
-
-    player->Render();
+    manager.draw();
 
     SDL_RenderPresent(renderer);
 
