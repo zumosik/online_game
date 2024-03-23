@@ -5,7 +5,6 @@
 #include <windows.h> // Windows support
 #include <thread>
 
-#include "RenderWindow.hpp"
 #include "TCPClient.hpp"
 #include "Game.h"
 
