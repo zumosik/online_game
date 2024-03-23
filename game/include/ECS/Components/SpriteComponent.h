@@ -30,7 +30,6 @@ public:
     }
 
     void update() override {
-
         dstRect.x = (int)transform->position.x;
         dstRect.y = (int)transform->position.y;
     }

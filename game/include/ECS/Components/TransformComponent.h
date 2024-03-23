@@ -25,7 +25,8 @@ public:
     }
 
     void update() override {
-        position += (velocity * Vector2f(speed, speed));
+        position.x += velocity.x * speed;
+        position.y += velocity.y * speed;
     }
 };
 

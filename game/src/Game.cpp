@@ -52,7 +52,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
     isRunning = true;
     map = new Map();
-    newPlayer.addComponent<TransformComponent>(Vector2f(), 3.5f);
+    newPlayer.addComponent<TransformComponent>();
     newPlayer.addComponent<SpriteComponent>("res/imgs/star.png");
     newPlayer.addComponent<KeyboardControllerComponent>();
 }
