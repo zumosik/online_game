@@ -11,21 +11,21 @@
 
 class TransformComponent : public Component {
 public:
-    TransformComponent() {position = Vector2int();}
-    explicit TransformComponent(Vector2int pos) : position(pos){}
+    TransformComponent() {position = Vector2f();}
+    explicit TransformComponent(Vector2f pos) : position(pos){}
 
-    Vector2int pos() { return position;}
-    void setPos(Vector2int pos){position = pos;}
+    Vector2f pos() { return position;}
+    void setPos(Vector2f pos){position = pos;}
 
     void init() override {
-        position = Vector2int();
+        position = Vector2f();
     }
 
     void update() override {
-        position.add(Vector2int(1,1));
+        position + Vector2f(1,1);
     }
 private:
-    Vector2int position;
+    Vector2f position;
 };
 
 #endif //GAME_SDL2_TRANSFORMCOMPONENT_H

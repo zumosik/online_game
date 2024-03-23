@@ -12,10 +12,14 @@
 class SpriteComponent : public Component {
 public:
     SpriteComponent() = default;
-    SpriteComponent(const char* path) {
-        tex = TextureManager::LoadTexture(path);
+    explicit SpriteComponent(const char* path) {
+        setTex(path);
     }
     ~SpriteComponent() = default;
+
+    void setTex(const char* path) {
+        tex = TextureManager::LoadTexture(path);
+    }
 
     void init() override {
         position = &entity->getComponent<TransformComponent>();
@@ -26,10 +30,10 @@ public:
     }
 
     void update() override {
-        Vector2int pos = position->pos();
+        Vector2f pos = position->pos();
 
-        dstRect.x = pos.x;
-        dstRect.y = pos.y;
+        dstRect.x = (int)pos.x;
+        dstRect.y = (int)pos.y;
     }
 
     void draw() override {

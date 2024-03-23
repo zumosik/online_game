@@ -5,7 +5,6 @@
 #include <iostream>
 #include "TextureManager.h"
 #include "Game.h"
-#include "GameObject.h"
 #include "Map.h"
 
 #include "ECS/ECS.h"
@@ -60,7 +59,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 void Game::update() {
     manager.update();
 
-    newPlayer.getComponent<TransformComponent>().pos().print();
+    std::cout << "Player pos: " << newPlayer.getComponent<TransformComponent>().pos() << std::endl;
 }
 
 void Game::handleEvents() {
