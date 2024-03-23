@@ -1,24 +1,33 @@
-#pragma once
+//
+// Created by a on 22.03.2024.
+//
 
-#include "RenderWindow.hpp"
-#include "Player.hpp"
+#ifndef GAME_SDL2_GAME_H
+#define GAME_SDL2_GAME_H
+
+#include <SDL.h>
+#include <SDL_image.h>
 
 
 class Game {
 public:
-    explicit Game(RenderWindow & window, Player player) : window(window), player(player), entities() {}
+    Game();
+    ~Game();
 
-    void GameLoop();
-private:
+    void init(const char * title, int xpos, int ypos, int width, int height, bool fullscreen);
+
     void handleEvents();
-    void handleKeyDown(SDL_Event event);
-    void handleKeyUp(SDL_Event event);
-    void handleFrame();
+    void update();
+    void render();
+    void clean();
 
-    RenderWindow window;
-    bool gameRunning = true;
-    Player player;
-    std::vector<Entity> entities;
+    bool running() {return isRunning;}
+private:
+    int cnt = 0;
+    bool isRunning;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
 };
 
 
+#endif //GAME_SDL2_GAME_H

@@ -25,7 +25,8 @@ add_executable(game_sdl2
         src/packet.cpp
         src/tcpClient.cpp
         src/buffer.cpp
-        src/game.cpp
         src/player.cpp
+        src/Game.cpp
+        src/textureManager.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${Boost_LIBRARIES} ws2_32)
