@@ -2,14 +2,15 @@ package server
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"log/slog"
 	"net"
 	"os"
 	"os/signal"
 	"server/internal/models"
+	"server/internal/saver"
 	"server/internal/utils"
+	"syscall"
 )
 
 var (
@@ -25,6 +26,8 @@ type Config struct {
 	Addr        string
 	Logger      *slog.Logger
 	MaxReadSize uint32
+
+	PathToSave string
 }
 
 type Server struct {
@@ -33,58 +36,80 @@ type Server struct {
 	l          *slog.Logger
 
 	maxReadSize uint32
-	msgCh       chan Message
 	quitCh      chan struct{}
+	msgCh       chan Message
+
+	save     *saver.Save
+	savePath string
 
 	playerMap map[net.Conn]models.Player
 }
 
 func New(cfg *Config) *Server {
+	f, err := os.Open(cfg.PathToSave)
+	if err != nil {
+		panic(err)
+	}
+
+	//var save *saver.Save - doesnt work
+	save := &saver.Save{}
+
+	cfg.Logger.Info("Loading all data to file", utils.Wrap("path", cfg.PathToSave))
+	err = save.ReadFromFile(f)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Server{
 		listenAddr: cfg.Addr,
 		l:          cfg.Logger,
 
 		maxReadSize: cfg.MaxReadSize,
-		msgCh:       make(chan Message, 10),
 		quitCh:      make(chan struct{}),
+		msgCh:       make(chan Message, 10),
+
+		save:     save,
+		savePath: cfg.PathToSave,
 
 		playerMap: make(map[net.Conn]models.Player),
 	}
 }
-func (s *Server) MustStart() {
-	defer close(s.quitCh)
 
+func (s *Server) MustStart() {
 	ln, err := net.Listen("tcp", s.listenAddr)
 	if err != nil {
-		s.l.Error("can't listen", utils.WrapErr(err))
-		return
+		s.l.Error("cant listen", utils.WrapErr(err))
 	}
-	defer func() {
+	defer func(ln net.Listener) {
 		err := ln.Close()
 		if err != nil {
-			s.l.Error("can't close listener", utils.WrapErr(err))
+			s.l.Error("cant close listener", utils.WrapErr(err))
 		}
+	}(ln)
+	s.ln = ln
+
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-signalCh
+		s.l.Info("Received termination signal. Shutting down server...")
+		s.shutdown()
 	}()
 
-	s.ln = ln
 	s.l.Info("Starting server!")
 
 	go s.acceptLoop()
 	go s.msgLoop()
 
-	// Handling signal interrupt to gracefully shutdown
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
+	<-s.quitCh
 
-	// Waiting for a signal
-	<-sig
-
-	// Shutdown sequence
-	fmt.Println("\nCtrl+C pressed. Closing connection...")
-	if err := ln.Close(); err != nil {
-		s.l.Error("can't close listener", utils.WrapErr(err))
-	}
 	close(s.msgCh)
+
+	err = s.SaveToSaver()
+	if err != nil {
+		s.l.Error("cant save", utils.WrapErr(err))
+	}
 }
 
 func (s *Server) acceptLoop() {
@@ -191,4 +216,19 @@ func (s *Server) connClose(conn net.Conn) {
 	if err != nil {
 		s.l.Error("cant close conn", utils.WrapErr(err))
 	}
+}
+
+func (s *Server) SaveToSaver() error {
+	s.l.Info("Saving all data to file", utils.Wrap("path", s.savePath))
+	f, err := os.Create(s.savePath)
+	if err != nil {
+		return err
+	}
+
+	err = s.save.WriteToFile(f)
+	return err
+}
+
+func (s *Server) shutdown() {
+	close(s.quitCh)
 }

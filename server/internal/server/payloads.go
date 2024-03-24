@@ -24,6 +24,7 @@ type Payload interface {
 
 type ConnectReq struct {
 	Username string
+	Pin      uint32 // like password
 }
 
 type ConnectResp struct {
@@ -42,9 +43,16 @@ type PlayerPosResp struct {
 
 func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 	_, exists := s.playerMap[conn]
-	if exists {
+	if exists { // already connected
 		return ConnectResp{OK: false}
 	}
+
+	for _, pl := range s.playerMap {
+		if pl.Username == req.Username {
+			return ConnectResp{OK: false} // someone is already playing
+		}
+	}
+	// TODO find user in save
 
 	// getting unique rnd id
 	id := uint16(rand.Intn(65535))
@@ -102,9 +110,10 @@ func (v *PlayerPosReq) Deserialize(b []byte) error {
 }
 
 func (v *ConnectReq) Serialize() []byte {
-	var buf bytes.Buffer
+	var buf *bytes.Buffer
 
-	utils.WriteString(&buf, v.Username)
+	utils.WriteString(buf, v.Username)
+	utils.WriteUint32(buf, v.Pin)
 
 	return buf.Bytes()
 }
@@ -113,7 +122,14 @@ func (v *ConnectReq) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
 	s, err := utils.ReadString(buf)
+	if err != nil {
+		return err
+	}
+	n, err := utils.ReadUint32(buf)
+
 	v.Username = s
+	v.Pin = n
+
 	return err
 }
 
