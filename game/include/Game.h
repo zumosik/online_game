@@ -7,8 +7,9 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <vector>
 
-
+class BoxColliderComponent;
 
 class Game {
 public:
@@ -26,6 +27,8 @@ public:
 
     static SDL_Renderer *renderer;
     static SDL_Event event;
+  
+    static std::vector<BoxColliderComponent*> colliders;
 private:
     bool isRunning{};
     SDL_Window *window{};
