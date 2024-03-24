@@ -5,7 +5,12 @@ import (
 	"io"
 	"log/slog"
 	"net"
-	"server/utils"
+	"os"
+	"os/signal"
+	"server/internal/models"
+	"server/internal/saver"
+	"server/internal/utils"
+	"syscall"
 )
 
 var (
@@ -21,6 +26,8 @@ type Config struct {
 	Addr        string
 	Logger      *slog.Logger
 	MaxReadSize uint32
+
+	PathToSave string
 }
 
 type Server struct {
@@ -32,10 +39,27 @@ type Server struct {
 	quitCh      chan struct{}
 	msgCh       chan Message
 
-	playerMap map[net.Conn]Player
+	save     *saver.Save
+	savePath string
+
+	playerMap map[net.Conn]models.Player
 }
 
 func New(cfg *Config) *Server {
+	f, err := os.Open(cfg.PathToSave)
+	if err != nil {
+		panic(err)
+	}
+
+	//var save *saver.Save - doesnt work
+	save := &saver.Save{}
+
+	cfg.Logger.Info("Loading all data to file", utils.Wrap("path", cfg.PathToSave))
+	err = save.ReadFromFile(f)
+	if err != nil {
+		panic(err)
+	}
+
 	return &Server{
 		listenAddr: cfg.Addr,
 		l:          cfg.Logger,
@@ -44,7 +68,10 @@ func New(cfg *Config) *Server {
 		quitCh:      make(chan struct{}),
 		msgCh:       make(chan Message, 10),
 
-		playerMap: make(map[net.Conn]Player),
+		save:     save,
+		savePath: cfg.PathToSave,
+
+		playerMap: make(map[net.Conn]models.Player),
 	}
 }
 
@@ -61,6 +88,15 @@ func (s *Server) MustStart() {
 	}(ln)
 	s.ln = ln
 
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-signalCh
+		s.l.Info("Received termination signal. Shutting down server...")
+		s.shutdown()
+	}()
+
 	s.l.Info("Starting server!")
 
 	go s.acceptLoop()
@@ -70,6 +106,10 @@ func (s *Server) MustStart() {
 
 	close(s.msgCh)
 
+	err = s.SaveToSaver()
+	if err != nil {
+		s.l.Error("cant save", utils.WrapErr(err))
+	}
 }
 
 func (s *Server) acceptLoop() {
@@ -176,4 +216,19 @@ func (s *Server) connClose(conn net.Conn) {
 	if err != nil {
 		s.l.Error("cant close conn", utils.WrapErr(err))
 	}
+}
+
+func (s *Server) SaveToSaver() error {
+	s.l.Info("Saving all data to file", utils.Wrap("path", s.savePath))
+	f, err := os.Create(s.savePath)
+	if err != nil {
+		return err
+	}
+
+	err = s.save.WriteToFile(f)
+	return err
+}
+
+func (s *Server) shutdown() {
+	close(s.quitCh)
 }

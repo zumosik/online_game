@@ -1,6 +1,9 @@
-package server
+package models
 
-import "bytes"
+import (
+	"bytes"
+	"server/internal/utils"
+)
 
 type Player struct {
 	Username string
@@ -24,17 +27,17 @@ func (v Vector) Add(v2 Vector) {
 }
 
 func (v Vector) Serialize(buf *bytes.Buffer) {
-	writeFloat64(buf, v.X)
-	writeFloat64(buf, v.Y)
+	utils.WriteFloat64(buf, v.X)
+	utils.WriteFloat64(buf, v.Y)
 }
 
 func (v Vector) Deserialize(buf *bytes.Buffer) error {
 
-	x, err := readFloat64(buf)
+	x, err := utils.ReadFloat64(buf)
 	if err != nil {
 		return err
 	}
-	y, err := readFloat64(buf)
+	y, err := utils.ReadFloat64(buf)
 
 	v.X = x
 	v.Y = y

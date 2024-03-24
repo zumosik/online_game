@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"server/internal/models"
 	"server/internal/server"
 	"syscall"
 	"time"
@@ -73,9 +74,9 @@ func main() {
 
 	id := packet.Payload.(*server.ConnectResp).ID
 
-	var vec server.Vector
+	var vec models.Vector
 
-	vecToAdd := server.Vector{
+	vecToAdd := models.Vector{
 		X: 1,
 		Y: 1,
 	}
@@ -118,8 +119,6 @@ func main() {
 			return
 		}
 		fmt.Println("Received:", *packet.Payload.(*server.PlayerPosResp))
-
-		vec = server.Vector{}
 
 		end := time.Now().Sub(start)
 		fmt.Println(end)

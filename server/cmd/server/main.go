@@ -31,9 +31,11 @@ func main() {
 		Addr:        ":8080",
 		Logger:      logger,
 		MaxReadSize: 1024,
+		PathToSave:  "saves/default.111",
 	})
 
 	srv.MustStart()
+
 }
 
 func setupLogger(env, filePath string) *slog.Logger {
