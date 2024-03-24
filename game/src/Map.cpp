@@ -36,7 +36,6 @@ Map::Map() {
     src.w = src.h = dst.w = dst.h = 32;
 }
 
-
 Map::~Map() {
     SDL_DestroyTexture(grass);
 }
@@ -63,4 +62,3 @@ void Map::DrawMap() {
         }
     }
 }
-

@@ -25,8 +25,6 @@ Vector2f &Vector2f::Add(const Vector2f &vec) {
     return *this;
 }
 
-
-
 Vector2f &Vector2f::Subtract(const Vector2f &vec) {
     this->x -= vec.x;
     this->y -= vec.y;
@@ -91,6 +89,7 @@ std::ostream &operator<<(std::ostream &ostream, const Vector2f &vec) {
     ostream << "Vec2f(" << vec.x << ", " << vec.y << ")";
     return ostream;
 }
+
 
 Vector2f &Vector2f::operator*(const float &i) {
     this->x *= i;

@@ -27,7 +27,7 @@ public:
 
     static SDL_Renderer *renderer;
     static SDL_Event event;
-
+  
     static std::vector<BoxColliderComponent*> colliders;
 private:
     bool isRunning{};
