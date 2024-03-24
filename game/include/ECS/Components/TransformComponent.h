@@ -13,11 +13,16 @@ class TransformComponent : public Component {
 public:
     Vector2f position;
     Vector2f velocity;
+    int h = 32;
+    int w = 32;
+    int scale = 1;
 
     float speed = 3;
 
     TransformComponent() {position = Vector2f(); }
-    explicit TransformComponent(Vector2f pos, float speed) : position(pos), speed(speed){}
+    explicit TransformComponent(Vector2f p_pos, float p_speed) : position(p_pos), speed(p_speed){}
+    explicit TransformComponent(Vector2f p_pos, float p_speed, int p_h, int p_w) : position(p_pos), speed(p_speed), h(p_h), w(p_w){}
+    explicit TransformComponent(Vector2f p_pos, float p_speed, int p_h, int p_w, int p_scale) : position(p_pos), speed(p_speed), h(p_h), w(p_w), scale(p_scale){}
 
 
     void init() override {

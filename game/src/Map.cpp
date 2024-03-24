@@ -36,7 +36,10 @@ Map::Map() {
     src.w = src.h = dst.w = dst.h = 32;
 }
 
-Map::~Map() = default;
+
+Map::~Map() {
+    SDL_DestroyTexture(grass);
+}
 
 void Map::LoadMap(int arr[20][25]) {
     for (int row = 0; row < 20; ++row) {
@@ -60,3 +63,4 @@ void Map::DrawMap() {
         }
     }
 }
+

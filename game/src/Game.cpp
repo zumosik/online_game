@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+
 #include "TextureManager.h"
 #include "Game.h"
 #include "Map.h"
@@ -16,9 +17,10 @@ Map *map;
 SDL_Renderer* Game::renderer = nullptr;
 
 Manager manager;
-auto& newPlayer(manager.addEntity());
 SDL_Event Game::event;
 
+auto& player(manager.addEntity());
+auto& wall(manager.addEntity());
 
 Game::Game() = default;
 Game::~Game() = default;
@@ -52,15 +54,34 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
     isRunning = true;
     map = new Map();
-    newPlayer.addComponent<TransformComponent>();
-    newPlayer.addComponent<SpriteComponent>("res/imgs/star.png");
-    newPlayer.addComponent<KeyboardControllerComponent>();
+
+    player.addComponent<TransformComponent>(Vector2f(), 5.0f, 32, 32, 2);
+    player.addComponent<SpriteComponent>("res/imgs/star.png");
+    player.addComponent<KeyboardControllerComponent>();
+    player.addComponent<BoxColliderComponent>("player");
+
+    wall.addComponent<TransformComponent>(Vector2f(300,300),0, 300, 20, 1);
+    wall.addComponent<SpriteComponent>("res/imgs/grass.png");
+    wall.addComponent<BoxColliderComponent>("wall");
+
 }
 
 void Game::update() {
     manager.update();
 
-    std::cout << "Player pos: " << newPlayer.getComponent<TransformComponent>().position << std::endl;
+
+    BoxColliderComponent* playerCollider = &player.getComponent<BoxColliderComponent>();
+    BoxColliderComponent* wallCollider = &wall.getComponent<BoxColliderComponent>();
+
+    if (playerCollider && wallCollider && // if this is null game just crashes
+        SDL_HasIntersection(&playerCollider->collider, &wallCollider->collider))
+    {
+        std::cout << "WALL!" << std::endl;
+    }
+
+
+
+//    std::cout << "Player pos: " << player.getComponent<TransformComponent>().position << std::endl;
 }
 
 void Game::handleEvents() {
