@@ -2,11 +2,11 @@ package server
 
 import (
 	"bytes"
-	"encoding/binary"
 	"log/slog"
-	"math"
 	"math/rand"
 	"net"
+	"server/internal/models"
+	"server/internal/utils"
 )
 
 const (
@@ -33,7 +33,7 @@ type ConnectResp struct {
 
 type PlayerPosReq struct {
 	ID     uint16
-	Vector Vector
+	Vector models.Vector
 }
 
 type PlayerPosResp struct {
@@ -52,10 +52,10 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 		id = uint16(rand.Intn(65535))
 	}
 
-	s.playerMap[conn] = Player{
+	s.playerMap[conn] = models.Player{
 		Username: req.Username,
 		UserID:   id,
-		Pos:      Vector{X: 0, Y: 0},
+		Pos:      models.Vector{X: 0, Y: 0},
 	}
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(id)))
@@ -65,7 +65,6 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 }
 
 func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosResp {
-	s.l.Debug("handlePlayerPosReq()")
 	player, exists := s.playerMap[conn]
 	if !exists && player.UserID != req.ID {
 		return PlayerPosResp{
@@ -83,7 +82,7 @@ func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosRe
 func (v *PlayerPosReq) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeUint16(&buf, v.ID)
+	utils.WriteUint16(&buf, v.ID)
 	v.Vector.Serialize(&buf)
 
 	return buf.Bytes()
@@ -92,12 +91,12 @@ func (v *PlayerPosReq) Serialize() []byte {
 func (v *PlayerPosReq) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	id, err := readUint16(buf)
+	id, err := utils.ReadUint16(buf)
 	if err != nil {
 		return err
 	}
 	v.ID = id
-	var vec Vector
+	var vec models.Vector
 	err = vec.Deserialize(buf)
 	return err
 }
@@ -105,7 +104,7 @@ func (v *PlayerPosReq) Deserialize(b []byte) error {
 func (v *ConnectReq) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeString(&buf, v.Username)
+	utils.WriteString(&buf, v.Username)
 
 	return buf.Bytes()
 }
@@ -113,7 +112,7 @@ func (v *ConnectReq) Serialize() []byte {
 func (v *ConnectReq) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	s, err := readString(buf)
+	s, err := utils.ReadString(buf)
 	v.Username = s
 	return err
 }
@@ -121,7 +120,7 @@ func (v *ConnectReq) Deserialize(b []byte) error {
 func (v *PlayerPosResp) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeBool(&buf, v.OK)
+	utils.WriteBool(&buf, v.OK)
 
 	return buf.Bytes()
 }
@@ -129,7 +128,7 @@ func (v *PlayerPosResp) Serialize() []byte {
 func (v *PlayerPosResp) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	ok, err := readBool(buf)
+	ok, err := utils.ReadBool(buf)
 
 	v.OK = ok
 
@@ -139,8 +138,8 @@ func (v *PlayerPosResp) Deserialize(b []byte) error {
 func (v *ConnectResp) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeBool(&buf, v.OK)
-	writeUint16(&buf, v.ID)
+	utils.WriteBool(&buf, v.OK)
+	utils.WriteUint16(&buf, v.ID)
 
 	return buf.Bytes()
 }
@@ -148,112 +147,16 @@ func (v *ConnectResp) Serialize() []byte {
 func (v *ConnectResp) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	ok, err := readBool(buf)
+	ok, err := utils.ReadBool(buf)
 	if err != nil {
 		return err
 	}
-	id, err := readUint16(buf)
+	id, err := utils.ReadUint16(buf)
 
 	v.OK = ok
 	v.ID = id
 
 	return err
-}
-
-func writeFloat32(buf *bytes.Buffer, f float32) {
-	writeUint32(buf, math.Float32bits(f))
-}
-
-func writeFloat64(buf *bytes.Buffer, f float64) {
-	writeUint64(buf, math.Float64bits(f))
-}
-
-func writeBool(buf *bytes.Buffer, b bool) {
-	if b == true {
-		writeByte(buf, 1)
-	} else {
-		writeByte(buf, 0)
-	}
-}
-
-// UTF-8
-func writeString(buf *bytes.Buffer, s string) {
-	l := uint32(len(s))
-	writeUint32(buf, l)
-
-	buf.Write([]byte(s))
-}
-
-func writeUint16(buf *bytes.Buffer, n uint16) {
-	binary.Write(buf, binary.BigEndian, n)
-}
-
-func writeUint32(buf *bytes.Buffer, n uint32) {
-	binary.Write(buf, binary.BigEndian, n)
-}
-
-func writeUint64(buf *bytes.Buffer, n uint64) {
-	binary.Write(buf, binary.BigEndian, n)
-}
-
-func writeByte(buf *bytes.Buffer, n byte) {
-	binary.Write(buf, binary.BigEndian, n)
-}
-
-func readString(buf *bytes.Buffer) (string, error) {
-	n, err := readUint32(buf)
-	if err != nil {
-		return "", err
-	}
-
-	strBytes := make([]byte, n)
-	_, err = buf.Read(strBytes)
-	if err != nil {
-		return "", err
-	}
-
-	str := string(strBytes)
-
-	return str, nil
-}
-
-func readFloat32(buf *bytes.Buffer) (float32, error) {
-	n, err := readUint32(buf)
-	return math.Float32frombits(n), err
-}
-
-func readFloat64(buf *bytes.Buffer) (float64, error) {
-	n, err := readUint64(buf)
-	return math.Float64frombits(n), err
-}
-
-func readUint16(buf *bytes.Buffer) (n uint16, err error) {
-	err = binary.Read(buf, binary.BigEndian, &n)
-	return n, err
-}
-
-func readUint32(buf *bytes.Buffer) (n uint32, err error) {
-	err = binary.Read(buf, binary.BigEndian, &n)
-	return n, err
-}
-
-func readUint64(buf *bytes.Buffer) (n uint64, err error) {
-	err = binary.Read(buf, binary.BigEndian, &n)
-	return n, err
-}
-
-func readByte(buf *bytes.Buffer) (n byte, err error) {
-	err = binary.Read(buf, binary.BigEndian, &n)
-	return n, err
-}
-
-func readBool(buf *bytes.Buffer) (bool, error) {
-	n, err := buf.ReadByte()
-	if n == 1 {
-		return true, err
-	}
-	return false, err
-
 }
 
 func (s *Server) isUserIDUnique(userID uint16) bool {
