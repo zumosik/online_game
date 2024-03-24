@@ -60,6 +60,8 @@ func New(cfg *Config) *Server {
 		panic(err)
 	}
 
+	save.Print(cfg.Logger)
+
 	return &Server{
 		listenAddr: cfg.Addr,
 		l:          cfg.Logger,
@@ -210,6 +212,11 @@ func (s *Server) SendToClient(conn net.Conn, payload Payload) error {
 }
 
 func (s *Server) connClose(conn net.Conn) {
+	pl, exists := s.playerMap[conn]
+	if exists {
+		s.save.Players[pl.Username] = pl
+		s.l.Debug("Saved player")
+	}
 	delete(s.playerMap, conn) // deleting player from map
 
 	err := conn.Close()

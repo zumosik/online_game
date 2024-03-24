@@ -44,3 +44,29 @@ func (v Vector) Deserialize(buf *bytes.Buffer) error {
 
 	return err
 }
+
+func (p *Player) Serialize(buf *bytes.Buffer) {
+	utils.WriteString(buf, p.Username)
+	utils.WriteUint16(buf, p.UserID)
+	p.Pos.Serialize(buf)
+}
+
+func (p *Player) Deserialize(buf *bytes.Buffer) error {
+	s, err := utils.ReadString(buf)
+	if err != nil {
+		return err
+	}
+	n, err := utils.ReadUint16(buf)
+	if err != nil {
+		return err
+	}
+	err = p.Pos.Deserialize(buf)
+	if err != nil {
+		return err
+	}
+
+	p.Username = s
+	p.UserID = n
+
+	return nil
+}

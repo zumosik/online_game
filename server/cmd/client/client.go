@@ -72,7 +72,7 @@ func main() {
 		return
 	}
 
-	id := packet.Payload.(*server.ConnectResp).ID
+	id := packet.Payload.(*server.ConnectResp).Player.UserID
 
 	var vec models.Vector
 

@@ -16,6 +16,7 @@ func main() {
 	}
 
 	s := saver.Save{
+		Name:    "default_server",
 		Players: make(map[string]models.Player),
 	}
 
