@@ -10,17 +10,24 @@
 
 #include "ECS/ECS.h"
 #include "ECS/Components.h"
+#include "Collision.h"
 
 
-Map *map;
+//Map *map;
 
 SDL_Renderer* Game::renderer = nullptr;
 
 Manager manager;
 SDL_Event Game::event;
 
+std::vector<BoxColliderComponent*> Game::colliders;
+
 auto& player(manager.addEntity());
 auto& wall(manager.addEntity());
+
+auto& tile10(manager.addEntity());
+auto& tile11(manager.addEntity());
+auto& tile12(manager.addEntity());
 
 Game::Game() = default;
 Game::~Game() = default;
@@ -53,33 +60,35 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     }
 
     isRunning = true;
-    map = new Map();
+//    map = new Map();
+
+    tile10.addComponent<TileComponent>(200,200,32,32,GRASS);
+    tile11.addComponent<TileComponent>(250,250,32,32,GRASS);
+    tile12.addComponent<TileComponent>(300,300,32,32,GRASS);
+
+    tile10.addComponent<BoxColliderComponent>("grass");
+    tile11.addComponent<BoxColliderComponent>("grass");
+    tile12.addComponent<BoxColliderComponent>("grass");
 
     player.addComponent<TransformComponent>(Vector2f(), 5.0f, 32, 32, 2);
     player.addComponent<SpriteComponent>("res/imgs/star.png");
     player.addComponent<KeyboardControllerComponent>();
     player.addComponent<BoxColliderComponent>("player");
-
-    wall.addComponent<TransformComponent>(Vector2f(300,300),0, 300, 20, 1);
-    wall.addComponent<SpriteComponent>("res/imgs/grass.png");
-    wall.addComponent<BoxColliderComponent>("wall");
+//
+//    wall.addComponent<TransformComponent>(Vector2f(300,300),0, 300, 20, 1);
+//    wall.addComponent<SpriteComponent>("res/imgs/grass.png");
+//    wall.addComponent<BoxColliderComponent>("wall");
 
 }
 
 void Game::update() {
+    manager.refresh();
     manager.update();
 
-
-    BoxColliderComponent* playerCollider = &player.getComponent<BoxColliderComponent>();
-    BoxColliderComponent* wallCollider = &wall.getComponent<BoxColliderComponent>();
-
-    if (playerCollider && wallCollider && // if this is null game just crashes
-        SDL_HasIntersection(&playerCollider->collider, &wallCollider->collider))
-    {
-        std::cout << "WALL!" << std::endl;
+    for (auto c : colliders) {
+        if (Collision::AABB(&player.getComponent<BoxColliderComponent>(), c))
+            player.getComponent<TransformComponent>().velocity * -1; // pushing player back
     }
-
-
 
 //    std::cout << "Player pos: " << player.getComponent<TransformComponent>().position << std::endl;
 }
@@ -98,7 +107,7 @@ void Game::handleEvents() {
 void Game::render() {
     SDL_RenderClear(renderer);
 
-    map->DrawMap();
+//    map->DrawMap();
     manager.draw();
 
     SDL_RenderPresent(renderer);

@@ -6,6 +6,7 @@ struct Vector2f
 {
     Vector2f();
     Vector2f(double p_x,double  p_y);
+    Vector2f(int p_x,int  p_y);
 
 
     Vector2f& Add(const Vector2f& vec);
@@ -22,6 +23,9 @@ struct Vector2f
     Vector2f& operator -= (const Vector2f& vec);
     Vector2f& operator *= (const Vector2f& vec);
     Vector2f& operator /= (const Vector2f& vec);
+
+    Vector2f& operator*(const float & i);
+    Vector2f& Zero();
 
     friend std::ostream& operator << (std::ostream& ostream, const Vector2f& vec);
 
