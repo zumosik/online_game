@@ -2,10 +2,14 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net"
-	"server/utils"
+	"os"
+	"os/signal"
+	"server/internal/models"
+	"server/internal/utils"
 )
 
 var (
@@ -29,10 +33,10 @@ type Server struct {
 	l          *slog.Logger
 
 	maxReadSize uint32
-	quitCh      chan struct{}
 	msgCh       chan Message
+	quitCh      chan struct{}
 
-	playerMap map[net.Conn]Player
+	playerMap map[net.Conn]models.Player
 }
 
 func New(cfg *Config) *Server {
@@ -41,35 +45,46 @@ func New(cfg *Config) *Server {
 		l:          cfg.Logger,
 
 		maxReadSize: cfg.MaxReadSize,
-		quitCh:      make(chan struct{}),
 		msgCh:       make(chan Message, 10),
+		quitCh:      make(chan struct{}),
 
-		playerMap: make(map[net.Conn]Player),
+		playerMap: make(map[net.Conn]models.Player),
 	}
 }
-
 func (s *Server) MustStart() {
+	defer close(s.quitCh)
+
 	ln, err := net.Listen("tcp", s.listenAddr)
 	if err != nil {
-		s.l.Error("cant listen", utils.WrapErr(err))
+		s.l.Error("can't listen", utils.WrapErr(err))
+		return
 	}
-	defer func(ln net.Listener) {
+	defer func() {
 		err := ln.Close()
 		if err != nil {
-			s.l.Error("cant close listener", utils.WrapErr(err))
+			s.l.Error("can't close listener", utils.WrapErr(err))
 		}
-	}(ln)
-	s.ln = ln
+	}()
 
+	s.ln = ln
 	s.l.Info("Starting server!")
 
 	go s.acceptLoop()
 	go s.msgLoop()
 
-	<-s.quitCh
+	// Handling signal interrupt to gracefully shutdown
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
 
+	// Waiting for a signal
+	<-sig
+
+	// Shutdown sequence
+	fmt.Println("\nCtrl+C pressed. Closing connection...")
+	if err := ln.Close(); err != nil {
+		s.l.Error("can't close listener", utils.WrapErr(err))
+	}
 	close(s.msgCh)
-
 }
 
 func (s *Server) acceptLoop() {

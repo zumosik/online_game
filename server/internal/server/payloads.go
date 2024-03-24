@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"math/rand"
 	"net"
+	"server/internal/models"
+	"server/internal/utils"
 )
 
 const (
@@ -31,7 +33,7 @@ type ConnectResp struct {
 
 type PlayerPosReq struct {
 	ID     uint16
-	Vector Vector
+	Vector models.Vector
 }
 
 type PlayerPosResp struct {
@@ -50,10 +52,10 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 		id = uint16(rand.Intn(65535))
 	}
 
-	s.playerMap[conn] = Player{
+	s.playerMap[conn] = models.Player{
 		Username: req.Username,
 		UserID:   id,
-		Pos:      Vector{X: 0, Y: 0},
+		Pos:      models.Vector{X: 0, Y: 0},
 	}
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(id)))
@@ -80,7 +82,7 @@ func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosRe
 func (v *PlayerPosReq) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeUint16(&buf, v.ID)
+	utils.WriteUint16(&buf, v.ID)
 	v.Vector.Serialize(&buf)
 
 	return buf.Bytes()
@@ -89,12 +91,12 @@ func (v *PlayerPosReq) Serialize() []byte {
 func (v *PlayerPosReq) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	id, err := readUint16(buf)
+	id, err := utils.ReadUint16(buf)
 	if err != nil {
 		return err
 	}
 	v.ID = id
-	var vec Vector
+	var vec models.Vector
 	err = vec.Deserialize(buf)
 	return err
 }
@@ -102,7 +104,7 @@ func (v *PlayerPosReq) Deserialize(b []byte) error {
 func (v *ConnectReq) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeString(&buf, v.Username)
+	utils.WriteString(&buf, v.Username)
 
 	return buf.Bytes()
 }
@@ -110,7 +112,7 @@ func (v *ConnectReq) Serialize() []byte {
 func (v *ConnectReq) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	s, err := readString(buf)
+	s, err := utils.ReadString(buf)
 	v.Username = s
 	return err
 }
@@ -118,7 +120,7 @@ func (v *ConnectReq) Deserialize(b []byte) error {
 func (v *PlayerPosResp) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeBool(&buf, v.OK)
+	utils.WriteBool(&buf, v.OK)
 
 	return buf.Bytes()
 }
@@ -126,7 +128,7 @@ func (v *PlayerPosResp) Serialize() []byte {
 func (v *PlayerPosResp) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	ok, err := readBool(buf)
+	ok, err := utils.ReadBool(buf)
 
 	v.OK = ok
 
@@ -136,8 +138,8 @@ func (v *PlayerPosResp) Deserialize(b []byte) error {
 func (v *ConnectResp) Serialize() []byte {
 	var buf bytes.Buffer
 
-	writeBool(&buf, v.OK)
-	writeUint16(&buf, v.ID)
+	utils.WriteBool(&buf, v.OK)
+	utils.WriteUint16(&buf, v.ID)
 
 	return buf.Bytes()
 }
@@ -145,14 +147,24 @@ func (v *ConnectResp) Serialize() []byte {
 func (v *ConnectResp) Deserialize(b []byte) error {
 	buf := bytes.NewBuffer(b)
 
-	ok, err := readBool(buf)
+	ok, err := utils.ReadBool(buf)
 	if err != nil {
 		return err
 	}
-	id, err := readUint16(buf)
+	id, err := utils.ReadUint16(buf)
 
 	v.OK = ok
 	v.ID = id
 
 	return err
+}
+
+func (s *Server) isUserIDUnique(userID uint16) bool {
+	// Iterate over the playerMap and check if the UserID already exists
+	for _, player := range s.playerMap {
+		if player.UserID == userID {
+			return false // UserID is not unique
+		}
+	}
+	return true // UserID is unique
 }
