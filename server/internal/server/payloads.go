@@ -55,7 +55,15 @@ func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) {
 
 	player.Pos = req.Vector
 	s.playerMap[conn] = player
+}
 
+func (s *Server) handleDisconnect(req DisconnectReq, conn net.Conn) DisconnectResp {
+	s.connClose(conn)
+
+	var resp DisconnectResp
+	resp.OK = true
+
+	return resp
 }
 
 func (s *Server) isUserIDUnique(userID uint16) bool {

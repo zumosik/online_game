@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	var id uint16
 	conn, err := net.Dial("tcp", ":8080")
 	if err != nil {
 		fmt.Println("Error connecting:", err)
@@ -31,6 +32,28 @@ func main() {
 	go func() {
 		<-sigCh
 		fmt.Println("\nCtrl+C pressed. Closing connection...")
+
+		req := server.DisconnectReq{ID: id}
+		packet := server.Packet{
+			TypeOfPacket: server.TypeOfPacketDisconnectReq,
+			Payload:      &req,
+		}
+
+		b, err := packet.Serialize()
+		if err != nil {
+			fmt.Println("Error serializing packet:", err)
+			return
+		}
+
+		sentN, err := conn.Write(b)
+		if err != nil {
+			fmt.Println("Error writing to connection:", err)
+			return
+		}
+
+		fmt.Println("Sent disconnect:", err)
+
+		fmt.Println("size of sent packet:", sentN)
 		if err := conn.Close(); err != nil {
 			fmt.Println("Error closing connection:", err)
 		}
@@ -72,7 +95,7 @@ func main() {
 	}
 
 	connResp := packet.Payload.(*server.ConnectResp)
-	id := connResp.Player.UserID
+	id = connResp.Player.UserID
 	vec := connResp.Player.Pos
 
 	for {
