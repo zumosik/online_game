@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	var id uint16
 	conn, err := net.Dial("tcp", ":8080")
 	if err != nil {
 		fmt.Println("Error connecting:", err)
@@ -31,13 +32,35 @@ func main() {
 	go func() {
 		<-sigCh
 		fmt.Println("\nCtrl+C pressed. Closing connection...")
+
+		req := server.DisconnectReq{ID: id}
+		packet := server.Packet{
+			TypeOfPacket: server.TypeOfPacketDisconnectReq,
+			Payload:      &req,
+		}
+
+		b, err := packet.Serialize()
+		if err != nil {
+			fmt.Println("Error serializing packet:", err)
+			return
+		}
+
+		sentN, err := conn.Write(b)
+		if err != nil {
+			fmt.Println("Error writing to connection:", err)
+			return
+		}
+
+		fmt.Println("Sent disconnect")
+
+		fmt.Println("size of sent packet:", sentN)
 		if err := conn.Close(); err != nil {
 			fmt.Println("Error closing connection:", err)
 		}
 		os.Exit(0)
 	}()
 
-	req := server.ConnectReq{Username: "user1"}
+	req := server.ConnectReq{Username: "user1", Pin: 1488}
 	packet := server.Packet{
 		TypeOfPacket: server.TypeOfPacketConnectReq,
 		Payload:      &req,
@@ -72,7 +95,13 @@ func main() {
 	}
 
 	connResp := packet.Payload.(*server.ConnectResp)
-	id := connResp.Player.UserID
+
+	if !connResp.OK {
+		fmt.Println("!connResp.OK")
+		return
+	}
+
+	id = connResp.Player.UserID
 	vec := connResp.Player.Pos
 
 	for {
@@ -102,22 +131,21 @@ func main() {
 			return
 		}
 
-		n, err := conn.Read(buffer)
-		if err != nil {
-			fmt.Println("Error reading from connection:", err)
-			return
-		}
+		// n, err := conn.Read(buffer)
+		// if err != nil {
+		// 	fmt.Println("Error reading from connection:", err)
+		// 	return
+		// }
 
-		fmt.Println("size of incoming packet:", n)
+		// fmt.Println("size of incoming packet:", n)
 
-		fmt.Println(buffer[:n])
+		// fmt.Println(buffer[:n])
 
-		packet, err := server.Deserialize(buffer[:n])
-		if err != nil {
-			fmt.Println("Error deserializing packet:", err)
-			return
-		}
-		fmt.Println("Received:", *packet.Payload.(*server.PlayerPosResp))
+		// packet, err := server.Deserialize(buffer[:n])
+		// if err != nil {
+		// 	fmt.Println("Error deserializing packet:", err)
+		// 	return
+		// }
 
 		end := time.Now().Sub(start)
 		fmt.Println(end)

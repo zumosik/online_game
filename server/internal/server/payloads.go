@@ -1,46 +1,11 @@
 package server
 
 import (
-	"bytes"
 	"log/slog"
 	"math/rand"
 	"net"
 	"server/internal/models"
-	"server/internal/utils"
 )
-
-const (
-	TypeOfPacketEmpty = iota // for errors
-	TypeOfPacketConnectReq
-	TypeOfPacketConnectResp
-	TypeOfPacketPlayerPosReq
-	TypeOfPacketPlayerPosResp
-)
-
-type Payload interface {
-	Serialize() []byte
-	Deserialize([]byte) error
-}
-
-type ConnectReq struct {
-	Username string
-	Pin      uint32 // like password
-}
-
-type ConnectResp struct {
-	OK            bool
-	AlreadyExists bool // if player already was in save
-	Player        models.Player
-}
-
-type PlayerPosReq struct {
-	ID     uint16
-	Vector models.Vector
-}
-
-type PlayerPosResp struct {
-	OK bool
-}
 
 func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 	_, exists := s.playerMap[conn]
@@ -58,19 +23,24 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 
 	var pl models.Player
 	pl, playerExists := s.save.Players[req.Username]
-	if !playerExists {
+	if !playerExists { // create new player
 		pl.Pos = models.Vector{X: 1, Y: 1}
 		pl.Username = req.Username
+		pl.Pin = req.Pin
 
 		// getting unique rnd id
-		id := uint16(rand.Intn(65535))
+		id := uint16(rand.Intn(65535)) // 65535 - max uint16
 		for !s.isUserIDUnique(id) {
 			id = uint16(rand.Intn(65535))
 		}
 
 		pl.UserID = id
 
-		// we don't need to save player here because it will be saves on shutdown
+		s.save.Players[pl.Username] = pl
+	} else {
+		if pl.Pin != req.Pin { // check "password"
+			return ConnectResp{OK: false} // pin doesnt match
+		}
 	}
 
 	s.playerMap[conn] = pl
@@ -81,117 +51,19 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 
 }
 
-func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosResp {
+func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) {
 
 	player, exists := s.playerMap[conn]
 	if !exists && player.UserID != req.ID {
-		return PlayerPosResp{
-			OK: false,
-		}
+		return
 	}
 
 	player.Pos = req.Vector
 	s.playerMap[conn] = player
-
-	return PlayerPosResp{
-		OK: true,
-	}
 }
 
-func (v *PlayerPosReq) Serialize() []byte {
-	var buf bytes.Buffer
-
-	utils.WriteUint16(&buf, v.ID)
-	v.Vector.Serialize(&buf)
-
-	return buf.Bytes()
-}
-
-func (v *PlayerPosReq) Deserialize(b []byte) error {
-	buf := bytes.NewBuffer(b)
-
-	id, err := utils.ReadUint16(buf)
-	if err != nil {
-		return err
-	}
-	v.ID = id
-
-	err = v.Vector.Deserialize(buf)
-	return err
-}
-
-func (v *ConnectReq) Serialize() []byte {
-	var buf bytes.Buffer
-
-	utils.WriteString(&buf, v.Username)
-	utils.WriteUint32(&buf, v.Pin)
-
-	return buf.Bytes()
-}
-
-func (v *ConnectReq) Deserialize(b []byte) error {
-	buf := bytes.NewBuffer(b)
-
-	s, err := utils.ReadString(buf)
-	if err != nil {
-		return err
-	}
-	n, err := utils.ReadUint32(buf)
-
-	v.Username = s
-	v.Pin = n
-
-	return err
-}
-
-func (v *PlayerPosResp) Serialize() []byte {
-	var buf bytes.Buffer
-
-	utils.WriteBool(&buf, v.OK)
-
-	return buf.Bytes()
-}
-
-func (v *PlayerPosResp) Deserialize(b []byte) error {
-	buf := bytes.NewBuffer(b)
-
-	ok, err := utils.ReadBool(buf)
-
-	v.OK = ok
-
-	return err
-}
-
-func (v *ConnectResp) Serialize() []byte {
-	var buf bytes.Buffer
-
-	utils.WriteBool(&buf, v.OK)
-	utils.WriteBool(&buf, v.AlreadyExists)
-	v.Player.Serialize(&buf)
-
-	return buf.Bytes()
-}
-
-func (v *ConnectResp) Deserialize(b []byte) error {
-	buf := bytes.NewBuffer(b)
-
-	ok, err := utils.ReadBool(buf)
-	if err != nil {
-		return err
-	}
-	exists, err := utils.ReadBool(buf)
-	if err != nil {
-		return err
-	}
-
-	v.OK = ok
-	v.AlreadyExists = exists
-	err = v.Player.Deserialize(buf)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (s *Server) handleDisconnect(req DisconnectReq, conn net.Conn) {
+	_ = s.connClose(conn)
 }
 
 func (s *Server) isUserIDUnique(userID uint16) bool {

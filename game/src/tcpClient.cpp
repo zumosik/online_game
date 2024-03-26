@@ -24,8 +24,9 @@ void TCPClient::start(const std::string& addr, const int port_num, boost::asio::
                                        std::cout << "Connected to server" << std::endl;
 
                                        // sending connect msg to server
-                                       ConnectReq req("player", 1442);
+                                       ConnectReq req("player");
                                        sendConnectReq(req);
+
 
 
                                        update();
@@ -45,16 +46,11 @@ void TCPClient::update() {
                             [&](std::error_code ec, std::size_t length) {
                                 if (!ec) {
                                     Buffer buff(buffer_);
+                                    buff.Print();
 
                                     Packet packet;
                                     packet.Deserialize(buff);
                                     if (packet.packetType == CONNECT_RESP) {
-                                        if (!packet.payload.connectResp.ok){
-                                            std::cerr << "Server HAVEN'T registered this connection" << std::endl;
-                                            abort();
-                                            return;
-                                        }
-
                                         std::cout << "Server registered this connection" << std::endl;
                                     }else {
                                         std::cout << "Server could not register this connection, exiting..." << std::endl;
@@ -70,7 +66,6 @@ void TCPClient::update() {
 }
 
 void TCPClient::sendBytes(Buffer& buf) {
-    buf.Print();
     async_write(socket_, boost::asio::buffer(buf.GetData(), buf.GetIndex()),
                 [](const boost::system::error_code& ec, std::size_t /*bytes_transferred*/) {
                     if (ec) {
@@ -83,9 +78,6 @@ void TCPClient::sendBytes(Buffer& buf) {
 
 void TCPClient::sendConnectReq(const ConnectReq& req) {
     Packet packet(CONNECT_REQ, req);
-
-    std::cout << req.Username << std::endl;
-    std::cout << req.pin << std::endl;
 
     Buffer buf(1024);
     packet.Serialize(buf);

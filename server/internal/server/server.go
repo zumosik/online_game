@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net"
@@ -55,7 +56,7 @@ func New(cfg *Config) *Server {
 	//var save *saver.Save - doesnt work
 	save := &saver.Save{}
 
-	cfg.Logger.Info("Loading all data to file", utils.Wrap("path", cfg.PathToSave))
+	cfg.Logger.Info("Loading all data from file", utils.Wrap("path", cfg.PathToSave))
 	err = save.ReadFromFile(f)
 	if err != nil {
 		panic(err)
@@ -183,12 +184,10 @@ func (s *Server) msgLoop() {
 			}
 		case TypeOfPacketPlayerPosReq:
 			req := msg.packet.Payload.(*PlayerPosReq)
-			resp := s.handlePlayerPosReq(*req, msg.from)
-			err := s.SendToClient(msg.from, &resp)
-			if err != nil {
-				s.l.Error("cant send to client", utils.WrapErr(err))
-				continue
-			}
+			s.handlePlayerPosReq(*req, msg.from)
+		case TypeOfPacketDisconnectReq:
+			req := msg.packet.Payload.(*DisconnectReq)
+			s.handleDisconnect(*req, msg.from)
 		}
 	}
 }
@@ -199,8 +198,6 @@ func (s *Server) SendToClient(conn net.Conn, payload Payload) error {
 	switch payload.(type) {
 	case *ConnectResp:
 		typeOfPacket = TypeOfPacketConnectResp
-	case *PlayerPosResp:
-		typeOfPacket = TypeOfPacketPlayerPosResp
 	default:
 		return ErrInvalidType
 	}
@@ -219,18 +216,23 @@ func (s *Server) SendToClient(conn net.Conn, payload Payload) error {
 	return err
 }
 
-func (s *Server) connClose(conn net.Conn) {
+func (s *Server) connClose(conn net.Conn) error {
 	pl, exists := s.playerMap[conn]
-	if exists {
-		s.save.Players[pl.Username] = pl
-		s.l.Debug("Saved player")
+	if !exists {
+		return nil
 	}
+
+	s.save.Players[pl.Username] = pl
+	s.l.Debug("Saved player", utils.Wrap("username", pl.Username), utils.Wrap("id", fmt.Sprint(pl.UserID)))
 	delete(s.playerMap, conn) // deleting player from map
 
 	err := conn.Close()
 	if err != nil {
 		s.l.Error("cant close conn", utils.WrapErr(err))
+		return err
 	}
+
+	return nil
 }
 
 func (s *Server) SaveToSaver() error {
@@ -241,7 +243,10 @@ func (s *Server) SaveToSaver() error {
 	}
 
 	for c := range s.playerMap {
-		s.connClose(c)
+		err := s.connClose(c)
+		if err != nil {
+			continue
+		}
 	}
 
 	err = s.save.WriteToFile(f)
