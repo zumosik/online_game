@@ -47,10 +47,14 @@ func getPayloadType(packetType byte) Payload {
 		payload = &ConnectReq{}
 	case TypeOfPacketConnectResp:
 		payload = &ConnectResp{}
+	case TypeOfPacketNewPlayerConnect:
+		payload = &NewPlayerConnect{}
+	case TypeOfPacketDisconnectReq:
+		payload = &DisconnectReq{}
+	case TypeOfPacketDisconnectResp:
+		payload = &DisconnectResp{}
 	case TypeOfPacketPlayerPosReq:
 		payload = &PlayerPosReq{}
-	case TypeOfPacketPlayerPosResp:
-		payload = &PlayerPosResp{}
 	}
 
 	return payload

@@ -102,22 +102,21 @@ func main() {
 			return
 		}
 
-		n, err := conn.Read(buffer)
-		if err != nil {
-			fmt.Println("Error reading from connection:", err)
-			return
-		}
+		// n, err := conn.Read(buffer)
+		// if err != nil {
+		// 	fmt.Println("Error reading from connection:", err)
+		// 	return
+		// }
 
-		fmt.Println("size of incoming packet:", n)
+		// fmt.Println("size of incoming packet:", n)
 
-		fmt.Println(buffer[:n])
+		// fmt.Println(buffer[:n])
 
-		packet, err := server.Deserialize(buffer[:n])
-		if err != nil {
-			fmt.Println("Error deserializing packet:", err)
-			return
-		}
-		fmt.Println("Received:", *packet.Payload.(*server.PlayerPosResp))
+		// packet, err := server.Deserialize(buffer[:n])
+		// if err != nil {
+		// 	fmt.Println("Error deserializing packet:", err)
+		// 	return
+		// }
 
 		end := time.Now().Sub(start)
 		fmt.Println(end)

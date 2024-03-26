@@ -183,12 +183,7 @@ func (s *Server) msgLoop() {
 			}
 		case TypeOfPacketPlayerPosReq:
 			req := msg.packet.Payload.(*PlayerPosReq)
-			resp := s.handlePlayerPosReq(*req, msg.from)
-			err := s.SendToClient(msg.from, &resp)
-			if err != nil {
-				s.l.Error("cant send to client", utils.WrapErr(err))
-				continue
-			}
+			s.handlePlayerPosReq(*req, msg.from)
 		}
 	}
 }
@@ -199,8 +194,6 @@ func (s *Server) SendToClient(conn net.Conn, payload Payload) error {
 	switch payload.(type) {
 	case *ConnectResp:
 		typeOfPacket = TypeOfPacketConnectResp
-	case *PlayerPosResp:
-		typeOfPacket = TypeOfPacketPlayerPosResp
 	default:
 		return ErrInvalidType
 	}
