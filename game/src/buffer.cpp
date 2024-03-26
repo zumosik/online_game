@@ -10,11 +10,9 @@ void Buffer::AppendByteToFront(uint8_t byte) {
 }
 
 void Buffer::Print() {
-    int arraySize = sizeof(data) / sizeof(data[0]);
-
     std::cout << "Buffer index: " << index << " Buffer size: " << size << std::endl;
     std::cout << "Buffer elements:" << std::endl;
-    for (int i = 0; i < arraySize; ++i) {
+    for (int i = 0; i < index; ++i) {
         std::cout << static_cast<int>(data[i]) << " "; // Cast to int for printing
     }
     std::cout << std::endl;
@@ -24,8 +22,9 @@ void Buffer::Print() {
 
 void Buffer::WriteShort(uint16_t value) {
     if (index + 2 <= size) {
-        data[index++] = static_cast<uint8_t>((value >> 8) & 0xFF);
-        data[index++] = static_cast<uint8_t>(value & 0xFF);
+        data[index+1] = static_cast<uint8_t>((value >> 8) & 0xFF);
+        data[index+1] = static_cast<uint8_t>(value & 0xFF);
+        index += 2;
     }
 }
 
@@ -78,5 +77,15 @@ uint8_t *Buffer::GetData() {
 
 size_t Buffer::GetIndex() {
     return index;
+}
+
+void Buffer::PrintAll() {
+    std::cout << "Buffer index: " << index << " Buffer size: " << size << std::endl;
+    std::cout << "Buffer elements:" << std::endl;
+    for (int i = 0; i < size; ++i) {
+        std::cout << static_cast<int>(data[i]) << " "; // Cast to int for printing
+    }
+    std::cout << std::endl;
+
 }
 

@@ -12,16 +12,19 @@
 struct ConnectReq {
     uint32_t UsernameLen;
     char Username[20]{};
+    uint32_t pin;
 
     explicit ConnectReq() {
         std::strncpy(Username, "", sizeof(Username) - 1);
         UsernameLen = static_cast<uint32_t>(std::strlen(Username));
+        pin = 0;
     }
 
-    explicit ConnectReq(const char* username) {
+    ConnectReq(const char* username, uint16_t p_pin) {
         std::strncpy(Username, username, sizeof(Username) - 1);
         Username[sizeof(Username) - 1] = '\0'; // Ensure null-terminated
         UsernameLen = static_cast<uint32_t>(std::strlen(Username));
+        pin = p_pin;
     }
 
     void Write( Buffer & buffer ) const;
