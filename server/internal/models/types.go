@@ -9,6 +9,7 @@ type Player struct {
 	Username string
 	UserID   uint16
 	Pos      Vector
+	Pin      uint32
 }
 
 type Vector struct {

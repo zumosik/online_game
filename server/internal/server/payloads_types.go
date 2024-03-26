@@ -8,7 +8,6 @@ const (
 	TypeOfPacketConnectResp             // connect resp
 	TypeOfPacketNewPlayerConnect        // notify other players about new conn
 	TypeOfPacketDisconnectReq           // safe disconnect
-	TypeOfPacketDisconnectResp          // if disconnected safe
 	TypeOfPacketPlayerPosReq            // send your pos
 )
 
@@ -39,8 +38,4 @@ type NewPlayerConnect struct {
 
 type DisconnectReq struct {
 	ID uint16
-}
-
-type DisconnectResp struct {
-	OK bool
 }

@@ -111,18 +111,3 @@ func (v *DisconnectReq) Deserialize(b []byte) error {
 	v.ID = n
 	return err
 }
-
-func (v *DisconnectResp) Serialize() []byte {
-	var buf bytes.Buffer
-
-	utils.WriteBool(&buf, v.OK)
-
-	return buf.Bytes()
-}
-
-func (v *DisconnectResp) Deserialize(b []byte) error {
-	buf := bytes.NewBuffer(b)
-	ok, err := utils.ReadBool(buf)
-	v.OK = ok
-	return err
-}

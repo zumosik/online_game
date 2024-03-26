@@ -51,7 +51,7 @@ func main() {
 			return
 		}
 
-		fmt.Println("Sent disconnect:", err)
+		fmt.Println("Sent disconnect")
 
 		fmt.Println("size of sent packet:", sentN)
 		if err := conn.Close(); err != nil {
@@ -60,7 +60,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	req := server.ConnectReq{Username: "user1"}
+	req := server.ConnectReq{Username: "user1", Pin: 1488}
 	packet := server.Packet{
 		TypeOfPacket: server.TypeOfPacketConnectReq,
 		Payload:      &req,
@@ -95,6 +95,12 @@ func main() {
 	}
 
 	connResp := packet.Payload.(*server.ConnectResp)
+
+	if !connResp.OK {
+		fmt.Println("!connResp.OK")
+		return
+	}
+
 	id = connResp.Player.UserID
 	vec := connResp.Player.Pos
 

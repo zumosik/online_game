@@ -23,19 +23,24 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 
 	var pl models.Player
 	pl, playerExists := s.save.Players[req.Username]
-	if !playerExists {
+	if !playerExists { // create new player
 		pl.Pos = models.Vector{X: 1, Y: 1}
 		pl.Username = req.Username
+		pl.Pin = req.Pin
 
 		// getting unique rnd id
-		id := uint16(rand.Intn(65535))
+		id := uint16(rand.Intn(65535)) // 65535 - max uint16
 		for !s.isUserIDUnique(id) {
 			id = uint16(rand.Intn(65535))
 		}
 
 		pl.UserID = id
 
-		// we don't need to save player here because it will be saves on shutdown
+		// we don't need to save player here because it will be saved on shutdown
+	} else {
+		if pl.Pin != req.Pin { // check "password"
+			return ConnectResp{OK: false} // pin doesnt match
+		}
 	}
 
 	s.playerMap[conn] = pl
@@ -57,13 +62,8 @@ func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) {
 	s.playerMap[conn] = player
 }
 
-func (s *Server) handleDisconnect(req DisconnectReq, conn net.Conn) DisconnectResp {
-	s.connClose(conn)
-
-	var resp DisconnectResp
-	resp.OK = true
-
-	return resp
+func (s *Server) handleDisconnect(req DisconnectReq, conn net.Conn) {
+	_ = s.connClose(conn)
 }
 
 func (s *Server) isUserIDUnique(userID uint16) bool {
