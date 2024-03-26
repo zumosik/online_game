@@ -26,12 +26,12 @@ func (v Vector) Add(v2 Vector) {
 	v.Y += v2.Y
 }
 
-func (v Vector) Serialize(buf *bytes.Buffer) {
+func (v *Vector) Serialize(buf *bytes.Buffer) {
 	utils.WriteFloat64(buf, v.X)
 	utils.WriteFloat64(buf, v.Y)
 }
 
-func (v Vector) Deserialize(buf *bytes.Buffer) error {
+func (v *Vector) Deserialize(buf *bytes.Buffer) error {
 
 	x, err := utils.ReadFloat64(buf)
 	if err != nil {

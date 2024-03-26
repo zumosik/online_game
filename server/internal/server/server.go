@@ -36,8 +36,9 @@ type Server struct {
 	l          *slog.Logger
 
 	maxReadSize uint32
-	quitCh      chan struct{}
-	msgCh       chan Message
+
+	quitCh chan struct{}
+	msgCh  chan Message
 
 	save     *saver.Save
 	savePath string
@@ -67,9 +68,11 @@ func New(cfg *Config) *Server {
 		l:          cfg.Logger,
 
 		maxReadSize: cfg.MaxReadSize,
-		quitCh:      make(chan struct{}),
-		msgCh:       make(chan Message, 10),
 
+		quitCh: make(chan struct{}),
+		msgCh:  make(chan Message, 10),
+
+		// saves
 		save:     save,
 		savePath: cfg.PathToSave,
 
@@ -116,15 +119,20 @@ func (s *Server) MustStart() {
 
 func (s *Server) acceptLoop() {
 	for {
-		conn, err := s.ln.Accept()
-		if err != nil {
-			s.l.Error("cant accept new conn", utils.WrapErr(err))
-			continue
+		select {
+		case <-s.quitCh:
+			return // Exit the accept loop if shutdown signal received
+		default:
+			conn, err := s.ln.Accept()
+			if err != nil {
+				s.l.Error("cant accept new conn", utils.WrapErr(err))
+				continue
+			}
+
+			s.l.Info("new connection", utils.Wrap("addr", conn.RemoteAddr().String()))
+
+			go s.readLoop(conn)
 		}
-
-		s.l.Info("new connection", utils.Wrap("addr", conn.RemoteAddr().String()))
-
-		go s.readLoop(conn)
 	}
 }
 
@@ -230,6 +238,10 @@ func (s *Server) SaveToSaver() error {
 	f, err := os.Create(s.savePath)
 	if err != nil {
 		return err
+	}
+
+	for c := range s.playerMap {
+		s.connClose(c)
 	}
 
 	err = s.save.WriteToFile(f)

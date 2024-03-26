@@ -59,7 +59,7 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 	var pl models.Player
 	pl, playerExists := s.save.Players[req.Username]
 	if !playerExists {
-		pl.Pos = models.Vector{X: 0, Y: 0}
+		pl.Pos = models.Vector{X: 1, Y: 1}
 		pl.Username = req.Username
 
 		// getting unique rnd id
@@ -82,7 +82,6 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 }
 
 func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosResp {
-	// FIXME idk -> Save data name="default_server" players="0: (id: 11539, username: user1, pos: (0.000000, 0.000000))"
 
 	player, exists := s.playerMap[conn]
 	if !exists && player.UserID != req.ID {
@@ -116,8 +115,8 @@ func (v *PlayerPosReq) Deserialize(b []byte) error {
 		return err
 	}
 	v.ID = id
-	var vec models.Vector
-	err = vec.Deserialize(buf)
+
+	err = v.Vector.Deserialize(buf)
 	return err
 }
 
