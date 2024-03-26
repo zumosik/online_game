@@ -30,6 +30,7 @@ public:
     size_t GetIndex();
 
     void Print();
+    void PrintAll();
     void AppendByteToFront(uint8_t byte);
 
     void WriteShort(uint16_t value);
