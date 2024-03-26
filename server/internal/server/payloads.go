@@ -36,7 +36,7 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 
 		pl.UserID = id
 
-		// we don't need to save player here because it will be saved on shutdown
+		s.save.Players[pl.Username] = pl
 	} else {
 		if pl.Pin != req.Pin { // check "password"
 			return ConnectResp{OK: false} // pin doesnt match
