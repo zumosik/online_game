@@ -5,7 +5,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"server/internal/models"
 	"server/internal/server"
 	"syscall"
 	"time"
@@ -72,19 +71,17 @@ func main() {
 		return
 	}
 
-	id := packet.Payload.(*server.ConnectResp).ID
-
-	var vec models.Vector
-
-	vecToAdd := models.Vector{
-		X: 1,
-		Y: 1,
-	}
+	connResp := packet.Payload.(*server.ConnectResp)
+	id := connResp.Player.UserID
+	vec := connResp.Player.Pos
 
 	for {
-
+		time.Sleep(time.Millisecond * 500)
 		start := time.Now()
-		vec.Add(vecToAdd)
+
+		vec.X += (1.0 / 3.0)
+		vec.Y += (1.0 / 9.0)
+
 		req := server.PlayerPosReq{ID: id, Vector: vec}
 		packet = server.Packet{
 			TypeOfPacket: server.TypeOfPacketPlayerPosReq,
@@ -96,6 +93,8 @@ func main() {
 			fmt.Println("Error serializing packet:", err)
 			return
 		}
+
+		fmt.Println(b)
 
 		_, err = conn.Write(b)
 		if err != nil {

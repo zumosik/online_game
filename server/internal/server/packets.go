@@ -1,7 +1,5 @@
 package server
 
-import "log"
-
 type Packet struct {
 	TypeOfPacket uint8
 	Payload      Payload
@@ -34,8 +32,6 @@ func Deserialize(b []byte) (Packet, error) {
 	if err := payload.Deserialize(b[1:] /* first byte is type of packet */); err != nil {
 		return Packet{}, err
 	}
-
-	log.Println(payload)
 
 	return Packet{
 		TypeOfPacket: b[0],

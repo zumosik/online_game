@@ -28,8 +28,9 @@ type ConnectReq struct {
 }
 
 type ConnectResp struct {
-	OK bool
-	ID uint16
+	OK            bool
+	AlreadyExists bool // if player already was in save
+	Player        models.Player
 }
 
 type PlayerPosReq struct {
@@ -52,27 +53,36 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 			return ConnectResp{OK: false} // someone is already playing
 		}
 	}
-	// TODO find user in save
 
-	// getting unique rnd id
-	id := uint16(rand.Intn(65535))
-	for !s.isUserIDUnique(id) {
-		id = uint16(rand.Intn(65535))
+	// Player is not connected:
+
+	var pl models.Player
+	pl, playerExists := s.save.Players[req.Username]
+	if !playerExists {
+		pl.Pos = models.Vector{X: 1, Y: 1}
+		pl.Username = req.Username
+
+		// getting unique rnd id
+		id := uint16(rand.Intn(65535))
+		for !s.isUserIDUnique(id) {
+			id = uint16(rand.Intn(65535))
+		}
+
+		pl.UserID = id
+
+		// we don't need to save player here because it will be saves on shutdown
 	}
 
-	s.playerMap[conn] = models.Player{
-		Username: req.Username,
-		UserID:   id,
-		Pos:      models.Vector{X: 0, Y: 0},
-	}
+	s.playerMap[conn] = pl
 
-	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(id)))
+	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(pl.UserID)))
 
-	return ConnectResp{OK: true, ID: id}
+	return ConnectResp{OK: true, AlreadyExists: playerExists, Player: pl}
 
 }
 
 func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosResp {
+
 	player, exists := s.playerMap[conn]
 	if !exists && player.UserID != req.ID {
 		return PlayerPosResp{
@@ -81,6 +91,7 @@ func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) PlayerPosRe
 	}
 
 	player.Pos = req.Vector
+	s.playerMap[conn] = player
 
 	return PlayerPosResp{
 		OK: true,
@@ -104,16 +115,16 @@ func (v *PlayerPosReq) Deserialize(b []byte) error {
 		return err
 	}
 	v.ID = id
-	var vec models.Vector
-	err = vec.Deserialize(buf)
+
+	err = v.Vector.Deserialize(buf)
 	return err
 }
 
 func (v *ConnectReq) Serialize() []byte {
-	var buf *bytes.Buffer
+	var buf bytes.Buffer
 
-	utils.WriteString(buf, v.Username)
-	utils.WriteUint32(buf, v.Pin)
+	utils.WriteString(&buf, v.Username)
+	utils.WriteUint32(&buf, v.Pin)
 
 	return buf.Bytes()
 }
@@ -155,7 +166,8 @@ func (v *ConnectResp) Serialize() []byte {
 	var buf bytes.Buffer
 
 	utils.WriteBool(&buf, v.OK)
-	utils.WriteUint16(&buf, v.ID)
+	utils.WriteBool(&buf, v.AlreadyExists)
+	v.Player.Serialize(&buf)
 
 	return buf.Bytes()
 }
@@ -167,12 +179,19 @@ func (v *ConnectResp) Deserialize(b []byte) error {
 	if err != nil {
 		return err
 	}
-	id, err := utils.ReadUint16(buf)
+	exists, err := utils.ReadBool(buf)
+	if err != nil {
+		return err
+	}
 
 	v.OK = ok
-	v.ID = id
+	v.AlreadyExists = exists
+	err = v.Player.Deserialize(buf)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
 func (s *Server) isUserIDUnique(userID uint16) bool {
