@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net"
 	"server/internal/models"
+	"server/internal/utils"
 )
 
 func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
@@ -40,6 +41,15 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 	} else {
 		if pl.Pin != req.Pin { // check "password"
 			return ConnectResp{OK: false} // pin doesnt match
+		}
+	}
+
+	for cl := range s.playerMap {
+		var req NewPlayerConnect
+		req.Player = pl
+		err := s.SendToClient(cl, &req)
+		if err != nil {
+			s.l.Error("Cant send to client about new conn", utils.WrapErr(err), utils.Wrap("client who wanted to recieve", cl.RemoteAddr().String()))
 		}
 	}
 
