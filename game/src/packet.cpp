@@ -43,13 +43,11 @@ void ConnectReq::Write(Buffer &buffer) const {
     for (int i = 0; i < UsernameLen; ++i)
         buffer.WriteChar( Username[i]);
 
-    buffer.WriteInteger(pin);
 }
 void ConnectReq::Read(Buffer &buffer) {
     UsernameLen = buffer.ReadInteger();
     for (int i = 0; i < UsernameLen; ++i)
         Username[i] = buffer.ReadChar();
-    pin = buffer.ReadShort();
 }
 
 void ConnectResp::Write(Buffer &buffer) const {

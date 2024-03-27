@@ -43,6 +43,15 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 		}
 	}
 
+	for cl := range s.playerMap {
+		var req NewPlayerConnect
+		req.Player = pl
+		err := s.SendToClient(cl, &req)
+		if err != nil {
+			s.l.Error("Cant send to client about new conn", utils.WrapErr(err), utils.Wrap("client who wanted to recieve", cl.RemoteAddr().String()))
+		}
+	}
+
 	s.playerMap[conn] = pl
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(pl.UserID)))
