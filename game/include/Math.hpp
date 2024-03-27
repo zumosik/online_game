@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include "Buffer.hpp"
 
 struct Vector2f
 {
@@ -26,6 +27,9 @@ struct Vector2f
 
     Vector2f& operator*(const float & i);
     Vector2f& Zero();
+
+    static void Write( Buffer & buf, const Vector2f& vec);
+    Vector2f& Read( Buffer & buf);
 
     friend std::ostream& operator << (std::ostream& ostream, const Vector2f& vec);
 

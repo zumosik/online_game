@@ -11,6 +11,6 @@
 #include "ECS/Components/KeyboardControllerComponent.h"
 #include "ECS/Components/BoxColliderComponent.h"
 #include "ECS/Components/TileComponent.h"
-
+#include "ECS/Components/PlayerInfoComponent.h"
 
 #endif //GAME_SDL2_COMPONENTS_H

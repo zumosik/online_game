@@ -52,7 +52,11 @@ void ConnectReq::Read(Buffer &buffer) {
 
 void ConnectResp::Write(Buffer &buffer) const {
     buffer.WriteChar( ok);
+    buffer.WriteChar( alreadyExists);
+    buffer.WritePlayer(&player);
 }
 void ConnectResp::Read(Buffer &buffer) {
     ok = buffer.ReadChar();
+    alreadyExists = buffer.ReadChar();
+    player = *buffer.ReadPlayer();
 }

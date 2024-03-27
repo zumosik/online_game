@@ -5,8 +5,9 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-
+#include "Math.hpp"
 #include "Buffer.hpp"
+#include "Types.h"
 
 
 struct ConnectReq {
@@ -31,9 +32,10 @@ struct ConnectReq {
 
 struct ConnectResp {
     bool ok;
+    bool alreadyExists;
+    Player player;
 
-    explicit ConnectResp(): ok(false) {};
-
+    ConnectResp(): ok(false), alreadyExists(false), player(Player()) {};
 
     void Write( Buffer & buffer ) const;
 

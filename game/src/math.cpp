@@ -105,4 +105,16 @@ Vector2f &Vector2f::Zero() {
     return *this;
 }
 
+void Vector2f::Write(Buffer &buf, const Vector2f &vec) {
+    buf.WriteDouble(vec.x);
+    buf.WriteDouble(vec.y);
+}
+
+Vector2f &Vector2f::Read(Buffer &buf) {
+    this->x = buf.ReadDouble();
+    this->y = buf.ReadDouble();
+
+    return *this;
+}
+
 

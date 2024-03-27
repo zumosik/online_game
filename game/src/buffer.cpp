@@ -44,6 +44,22 @@ void Buffer::WriteInteger(uint32_t value) {
     }
 }
 
+void Buffer::WriteDouble(double value) {
+    if (index + sizeof(double) <= size) {
+        std::memcpy(&data[index], &value, sizeof(double));
+        index += sizeof(double);
+    }
+}
+
+double Buffer::ReadDouble() {
+    double value = 0;
+    if (index + sizeof(double) <= size) {
+        std::memcpy(&value, &data[index], sizeof(double));
+        index += sizeof(double);
+    }
+    return value;
+}
+
 uint32_t Buffer::ReadInteger() {
     uint32_t value = 0;
     if (index + 4 <= size) {
@@ -78,5 +94,28 @@ uint8_t *Buffer::GetData() {
 
 size_t Buffer::GetIndex() {
     return index;
+}
+
+void Buffer::WritePlayer(Player *player) {
+    WriteShort(player->id);
+    auto len = std::strlen(player->username);
+    WriteInteger(static_cast<uint32_t>(len));
+    for (int i = 0; i < len; ++i)
+        WriteChar( player->username[i]);
+
+    player->pos.Write(*this);
+}
+
+Player *Buffer::ReadPlayer() {
+    Player pl;
+    pl.id = ReadShort();
+    auto len = ReadInteger();
+
+    for (int i = 0; i < len; ++i)
+        pl.username[i] = ReadChar();
+
+    Vector2f vec;
+    vec.Read(*this);
+    pl.pos = vec;
 }
 

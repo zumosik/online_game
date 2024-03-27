@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net"
 	"server/internal/models"
+	"server/internal/utils"
 )
 
 func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
