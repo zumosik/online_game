@@ -123,6 +123,6 @@ void Game::clean() {
 }
 
 void Game::InitializePlayer(ConnectResp *resp) {
-    std::cout << "InitializePlayer" << std::endl;
     player.addComponent<PlayerInfoComponent>(resp->player.username, resp->player.id, resp->player.pos);
+    std::cout << "InitializePlayer, id = " << resp->player.id   << std::endl;
 }

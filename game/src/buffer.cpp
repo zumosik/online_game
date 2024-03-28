@@ -95,27 +95,3 @@ uint8_t *Buffer::GetData() {
 size_t Buffer::GetIndex() {
     return index;
 }
-
-void Buffer::WritePlayer(Player *player) {
-    WriteShort(player->id);
-    auto len = std::strlen(player->username);
-    WriteInteger(static_cast<uint32_t>(len));
-    for (int i = 0; i < len; ++i)
-        WriteChar( player->username[i]);
-
-    player->pos.Write(*this);
-}
-
-Player *Buffer::ReadPlayer() {
-    Player pl;
-    pl.id = ReadShort();
-    auto len = ReadInteger();
-
-    for (int i = 0; i < len; ++i)
-        pl.username[i] = ReadChar();
-
-    Vector2f vec;
-    vec.Read(*this);
-    pl.pos = vec;
-}
-

@@ -20,17 +20,20 @@ void Packet::Serialize(Buffer &buffer) const {
 
 void Packet::Deserialize(Buffer &buffer) {
 //    packetType = buffer.ReadChar();
-    packetType = static_cast<PacketTypeEnum>(buffer.ReadChar());
+    char t = buffer.ReadChar();
+    packetType = static_cast<PacketTypeEnum>(t);
+
+
     switch (packetType) {
         case CONNECT_REQ: {
             ConnectReq v;
             v.Read(buffer);
-            payload.connectReq.Read(buffer);
+            payload.connectReq = v;
         }
         case CONNECT_RESP: {
             ConnectResp v;
             v.Read(buffer);
-            payload.connectResp.Read(buffer);
+            payload.connectResp = v;
         }
         default:
             break;
@@ -53,10 +56,10 @@ void ConnectReq::Read(Buffer &buffer) {
 void ConnectResp::Write(Buffer &buffer) const {
     buffer.WriteChar( ok);
     buffer.WriteChar( alreadyExists);
-    buffer.WritePlayer(&player);
+    Player::Write(buffer, player);
 }
 void ConnectResp::Read(Buffer &buffer) {
     ok = buffer.ReadChar();
     alreadyExists = buffer.ReadChar();
-    player = *buffer.ReadPlayer();
+    player.Read(buffer);
 }

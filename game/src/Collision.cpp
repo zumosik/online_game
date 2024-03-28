@@ -9,7 +9,7 @@ bool Collision::AABB(const BoxColliderComponent *colA, const BoxColliderComponen
         colA->tag != colB->tag && // not sure about this
         SDL_HasIntersection(&colA->collider, &colB->collider))
     {
-        std::cout << colA->tag << " hit " << colB->tag << std::endl;
+//        std::cout << colA->tag << " hit " << colB->tag << std::endl;
         return true;
     }
 

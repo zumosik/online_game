@@ -35,3 +35,16 @@ struct Vector2f
 
     double x,y;
 };
+
+struct Player {
+    char username[20]{};
+    uint16_t id;
+    Vector2f pos;
+
+    Player() :username(""), id(0), pos(Vector2f())  {};
+
+    static void Write( Buffer & buf, const Player& pl);
+    Player& Read( Buffer & buf);
+
+//    uint32_t pin;
+};

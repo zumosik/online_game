@@ -5,9 +5,8 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include "Math.hpp"
+#include "Types.hpp"
 #include "Buffer.hpp"
-#include "Types.h"
 
 
 struct ConnectReq {
@@ -53,7 +52,7 @@ union Payload {
     ConnectResp connectResp;
 };
 
-enum PacketTypeEnum {EMPTY = 0,  CONNECT_REQ = 1, CONNECT_RESP = 2 };
+enum PacketTypeEnum {EMPTY = 0,  CONNECT_REQ = 1, CONNECT_RESP = 2, NEW_PLAYER_CONNECT = 3, PACKET_DISCONNECT_REQ = 4, PACKET_DISCONNECT_RESP = 5};
 
 struct Packet
 {

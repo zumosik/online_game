@@ -4,7 +4,6 @@
 #include <vector>
 #include <cstring>
 #include <boost/asio/buffer.hpp>
-#include "Types.h"
 
 using bytes = std::vector<std::byte>;
 
@@ -37,13 +36,11 @@ public:
     void WriteChar(uint8_t value);
     void WriteInteger( uint32_t value);
     void WriteDouble(double value);
-    void WritePlayer(Player* player);
 
     uint32_t ReadInteger();
     uint16_t ReadShort();
     uint8_t ReadChar();
     double ReadDouble();
-    Player* ReadPlayer();
 
 
 private:

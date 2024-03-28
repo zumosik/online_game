@@ -47,10 +47,13 @@ void TCPClient::update() {
                             [&](std::error_code ec, std::size_t length) {
                                 if (!ec) {
                                     Buffer buff(buffer_);
+                                    std::cout << "\nGot from server:" << std::endl;
                                     buff.Print();
 
                                     Packet packet;
                                     packet.Deserialize(buff);
+
+                                    std::cout << packet.packetType << std::endl;
                                     if (packet.packetType == CONNECT_RESP) {
                                         if (packet.payload.connectResp.ok) {
                                             std::cout << "Server registered this connection" << std::endl;

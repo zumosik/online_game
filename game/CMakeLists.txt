@@ -19,7 +19,7 @@ include_directories(include)
 
 add_executable(game_sdl2
         src/main.cpp
-        src/math.cpp
+        src/types.cpp
         src/packet.cpp
         src/tcpClient.cpp
         src/buffer.cpp
