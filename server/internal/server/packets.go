@@ -1,5 +1,10 @@
 package server
 
+import (
+	"errors"
+	"io"
+)
+
 type Packet struct {
 	TypeOfPacket uint8
 	Payload      Payload
@@ -30,7 +35,9 @@ func Deserialize(b []byte) (Packet, error) {
 	payload := getPayloadType(b[0])
 
 	if err := payload.Deserialize(b[1:] /* first byte is type of packet */); err != nil {
-		return Packet{}, err
+		if !errors.Is(err, io.EOF) { // EOF is normal behaviour
+			return Packet{}, err
+		}
 	}
 
 	return Packet{

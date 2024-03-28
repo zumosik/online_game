@@ -44,6 +44,22 @@ void Buffer::WriteInteger(uint32_t value) {
     }
 }
 
+void Buffer::WriteDouble(double value) {
+    if (index + sizeof(double) <= size) {
+        std::memcpy(&data[index], &value, sizeof(double));
+        index += sizeof(double);
+    }
+}
+
+double Buffer::ReadDouble() {
+    double value = 0;
+    if (index + sizeof(double) <= size) {
+        std::memcpy(&value, &data[index], sizeof(double));
+        index += sizeof(double);
+    }
+    return value;
+}
+
 uint32_t Buffer::ReadInteger() {
     uint32_t value = 0;
     if (index + 4 <= size) {
@@ -79,4 +95,3 @@ uint8_t *Buffer::GetData() {
 size_t Buffer::GetIndex() {
     return index;
 }
-

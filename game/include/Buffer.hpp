@@ -35,11 +35,12 @@ public:
     void WriteShort(uint16_t value);
     void WriteChar(uint8_t value);
     void WriteInteger( uint32_t value);
+    void WriteDouble(double value);
 
     uint32_t ReadInteger();
     uint16_t ReadShort();
     uint8_t ReadChar();
-
+    double ReadDouble();
 
 
 private:

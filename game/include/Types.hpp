@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include "Buffer.hpp"
 
 struct Vector2f
 {
@@ -27,7 +28,23 @@ struct Vector2f
     Vector2f& operator*(const float & i);
     Vector2f& Zero();
 
+    static void Write( Buffer & buf, const Vector2f& vec);
+    Vector2f& Read( Buffer & buf);
+
     friend std::ostream& operator << (std::ostream& ostream, const Vector2f& vec);
 
     double x,y;
+};
+
+struct Player {
+    char username[20]{};
+    uint16_t id;
+    Vector2f pos;
+
+    Player() :username(""), id(0), pos(Vector2f())  {};
+
+    static void Write( Buffer & buf, const Player& pl);
+    Player& Read( Buffer & buf);
+
+//    uint32_t pin;
 };

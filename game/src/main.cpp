@@ -24,8 +24,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 //    if (!IMG_Init(IMG_INIT_PNG))
 //        std::cout << "IMG_Init has failed. Error: " << SDL_GetError() << std::endl;
 
-    // TODO uncomment
-/*
+
     // Connect to TCP
     auto addr = "127.0.0.1";
     int port = 8080;
@@ -35,12 +34,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     std::thread ioContextThread(runIoContext); // Run io_context.run() in a separate thread
 
-    */
 
     // All Game stuff
     const int FPS = 60;
     const int frameDelay = 1000/FPS;
-    std::cout << "Running game in: " << FPS << " fps" << std::endl;
+    std::cout << "Starting game in " << FPS << " fps" << std::endl;
 
     Uint32 frameStart;
     int frameTime;
@@ -48,6 +46,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     game = new Game();
 
     game->init("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280,720, false);
+
+    std::cout << "starting game" << std::endl;
 
     while (game->running()) {
         frameStart = SDL_GetTicks();
@@ -64,13 +64,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     game->clean();
 
-    // TODO uncomment
-/*
+
     tcpClient.stop();
     io_context.stop(); // Stop io_context when program exits
     ioContextThread.join(); // Wait for io_context thread to finish
 
-    */
+
 
     return 0;
 }

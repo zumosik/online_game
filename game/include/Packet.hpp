@@ -5,7 +5,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-
+#include "Types.hpp"
 #include "Buffer.hpp"
 
 
@@ -31,9 +31,10 @@ struct ConnectReq {
 
 struct ConnectResp {
     bool ok;
+    bool alreadyExists;
+    Player player;
 
-    explicit ConnectResp(): ok(false) {};
-
+    ConnectResp(): ok(false), alreadyExists(false), player(Player()) {};
 
     void Write( Buffer & buffer ) const;
 
@@ -51,7 +52,7 @@ union Payload {
     ConnectResp connectResp;
 };
 
-enum PacketTypeEnum {EMPTY = 0,  CONNECT_REQ = 1, CONNECT_RESP = 2 };
+enum PacketTypeEnum {EMPTY = 0,  CONNECT_REQ = 1, CONNECT_RESP = 2, NEW_PLAYER_CONNECT = 3, PACKET_DISCONNECT_REQ = 4, PACKET_DISCONNECT_RESP = 5};
 
 struct Packet
 {

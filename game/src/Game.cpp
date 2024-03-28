@@ -121,3 +121,8 @@ void Game::clean() {
     SDL_Quit();
     std::cout << "Game cleaned" << std::endl;
 }
+
+void Game::InitializePlayer(ConnectResp *resp) {
+    player.addComponent<PlayerInfoComponent>(resp->player.username, resp->player.id, resp->player.pos);
+    std::cout << "InitializePlayer, id = " << resp->player.id   << std::endl;
+}

@@ -2,7 +2,7 @@
 // Created by a on 15.03.2024.
 //
 
-#include "Math.hpp"
+#include "Types.hpp"
 
 Vector2f::Vector2f() {x = 0.0f; y = 0.0f;}
 
@@ -105,4 +105,43 @@ Vector2f &Vector2f::Zero() {
     return *this;
 }
 
+void Vector2f::Write(Buffer &buf, const Vector2f &vec) {
+    buf.WriteDouble(vec.x);
+    buf.WriteDouble(vec.y);
+}
 
+Vector2f &Vector2f::Read(Buffer &buf) {
+    this->x = buf.ReadDouble();
+    this->y = buf.ReadDouble();
+
+    return *this;
+}
+
+
+void Player::Write(Buffer &buf, const Player &pl) {
+    buf.WriteShort(pl.id);
+    auto len = std::strlen(pl.username);
+    buf.WriteInteger(static_cast<uint32_t>(len));
+    for (int i = 0; i < len; ++i)
+        buf.WriteChar( pl.username[i]);
+
+    Vector2f::Write(buf, pl.pos);
+}
+
+
+
+Player &Player::Read(Buffer &buf) {
+    Player pl;
+    id = buf.ReadShort();
+    auto len = buf.ReadInteger();
+
+
+    for (int i = 0; i < len; ++i)
+        pl.username[i] = buf.ReadChar();
+
+    // Null-terminate the username to make it a valid C-string
+    username[len] = '\0';
+    pos.Read(buf);
+
+    return *this;
+}

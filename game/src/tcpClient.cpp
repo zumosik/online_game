@@ -5,6 +5,7 @@
 #include <boost/asio/ts/buffer.hpp>
 #include <boost/asio/ts/internet.hpp>
 #include <thread>
+#include "Game.h"
 
 #ifdef _WIN32
 #define _WIN32_WINNT 0x0A00
@@ -24,7 +25,7 @@ void TCPClient::start(const std::string& addr, const int port_num, boost::asio::
                                        std::cout << "Connected to server" << std::endl;
 
                                        // sending connect msg to server
-                                       ConnectReq req("player");
+                                       ConnectReq req("player_cpp");
                                        sendConnectReq(req);
 
 
@@ -46,16 +47,27 @@ void TCPClient::update() {
                             [&](std::error_code ec, std::size_t length) {
                                 if (!ec) {
                                     Buffer buff(buffer_);
+                                    std::cout << "\nGot from server:" << std::endl;
                                     buff.Print();
 
                                     Packet packet;
                                     packet.Deserialize(buff);
+
+                                    std::cout << packet.packetType << std::endl;
                                     if (packet.packetType == CONNECT_RESP) {
-                                        std::cout << "Server registered this connection" << std::endl;
-                                    }else {
-                                        std::cout << "Server could not register this connection, exiting..." << std::endl;
-                                        abort();
+                                        if (packet.payload.connectResp.ok) {
+                                            std::cout << "Server registered this connection" << std::endl;
+
+                                            Game::InitializePlayer(&packet.payload.connectResp);
+                                        } else {
+                                            std::cout << "Server could not register this connection, exiting..." << std::endl;
+                                            abort();
+                                        }
+
+
                                     }
+
+
 
                                     std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10 ms
                                     update(); // Continue reading

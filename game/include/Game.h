@@ -8,6 +8,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <vector>
+#include "Packet.hpp"
 
 class BoxColliderComponent;
 
@@ -29,6 +30,8 @@ public:
     static SDL_Event event;
   
     static std::vector<BoxColliderComponent*> colliders;
+
+    static void InitializePlayer(ConnectResp* req);
 private:
     bool isRunning{};
     SDL_Window *window{};

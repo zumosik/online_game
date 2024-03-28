@@ -7,7 +7,7 @@
 
 #include "ECS/Components.h"
 #include "ECS/ECS.h"
-#include "Math.hpp"
+#include "Types.hpp"
 
 class TransformComponent : public Component {
 public:
