@@ -12,6 +12,8 @@
 #include "ECS/Components.h"
 #include "Collision.h"
 
+#include "SDL_ttf.h"
+
 
 //Map *map;
 
@@ -24,6 +26,8 @@ std::vector<BoxColliderComponent*> Game::colliders;
 
 auto& player(manager.addEntity());
 auto& wall(manager.addEntity());
+
+auto& text (manager.addEntity());
 
 auto& tile10(manager.addEntity());
 auto& tile11(manager.addEntity());
@@ -45,6 +49,19 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
         isRunning = false;
         return;
     }
+
+    std::cout << "eu1" << std::endl;
+
+    if (TTF_Init() == 0) {
+        std::cout << "Sdl ttf initiated" << std::endl;
+    } else {
+        std::cerr << "Can initialize SDL_TTF: " << SDL_GetError() << std::endl;
+        isRunning = false;
+        return;
+    }
+
+    std::cout << "eu2" << std::endl;
+
 
     if (!IMG_Init(IMG_INIT_PNG))
         std::cout << "IMG_Init has failed. Error: " << SDL_GetError() << std::endl;
@@ -75,6 +92,14 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     player.addComponent<SpriteComponent>("res/imgs/star.png");
     player.addComponent<KeyboardControllerComponent>();
     player.addComponent<BoxColliderComponent>("player");
+
+
+    std::cout << "eu3" << std::endl;
+
+    SDL_Color col = {0,0,0};
+    text.addComponent<TransformComponent>();
+    text.addComponent<TextComponent>("res/font.ttf", 32, col);
+
 //
 //    wall.addComponent<TransformComponent>(Vector2f(300,300),0, 300, 20, 1);
 //    wall.addComponent<SpriteComponent>("res/imgs/grass.png");

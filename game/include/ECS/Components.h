@@ -12,5 +12,6 @@
 #include "ECS/Components/BoxColliderComponent.h"
 #include "ECS/Components/TileComponent.h"
 #include "ECS/Components/PlayerInfoComponent.h"
+#include "ECS/Components/ui/TextComponent.h"
 
 #endif //GAME_SDL2_COMPONENTS_H

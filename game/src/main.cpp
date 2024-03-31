@@ -4,7 +4,6 @@
 #include <winsock2.h> // Very important to compile code
 #include <windows.h> // Windows support
 #include <thread>
-
 #include "TCPClient.hpp"
 #include "Game.h"
 
@@ -17,6 +16,7 @@ void runIoContext() {
 
 // Define WinMain as the entry point for Windows GUI applications
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    std::cout << "start" << std::endl;
     // Init sdl...
 //    if (SDL_Init(SDL_INIT_VIDEO) > 0)
 //        std::cout << "SDL_Init has failed. SDL_ERROR: " << SDL_GetError() << std::endl;
