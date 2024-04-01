@@ -43,6 +43,7 @@ void TCPClient::stop() {
 }
 
 void TCPClient::update() {
+
     socket_.async_read_some(boost::asio::buffer(buffer_),
                             [&](std::error_code ec, std::size_t length) {
                                 if (!ec) {
@@ -67,7 +68,14 @@ void TCPClient::update() {
 
                                     }
 
+                                    auto end_time = std::chrono::steady_clock::now();
+                                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+                                    duration++; // with local server ping can be 0
 
+                                    std::cout << "Round-trip time: " << duration.count() << " ms" << std::endl;
+
+
+                                    Game::SetPing(duration);
 
                                     std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10 ms
                                     update(); // Continue reading
@@ -78,6 +86,7 @@ void TCPClient::update() {
 }
 
 void TCPClient::sendBytes(Buffer& buf) {
+    start_time = std::chrono::steady_clock::now();
     async_write(socket_, boost::asio::buffer(buf.GetData(), buf.GetIndex()),
                 [](const boost::system::error_code& ec, std::size_t /*bytes_transferred*/) {
                     if (ec) {

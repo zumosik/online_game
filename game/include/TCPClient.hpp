@@ -23,6 +23,7 @@ private:
     boost::asio::ip::tcp::socket socket_;
     std::vector<char> buffer_;
     boost::asio::io_context context;
+    std::chrono::steady_clock::time_point start_time;
 
 
     void sendBytes(Buffer& buf);

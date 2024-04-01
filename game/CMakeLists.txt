@@ -27,6 +27,7 @@ add_executable(game_sdl2
         src/textureManager.cpp
         src/Map.cpp
         src/Collision.cpp
+        src/ecs.cpp
 )
 
 target_link_libraries(game_sdl2

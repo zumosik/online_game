@@ -12,15 +12,27 @@
 class SpriteTextComponent : public Component {
 public:
     SpriteTextComponent() = default;
-    SpriteTextComponent(const char* path_to_ttf, int size, SDL_Color color, const char* text) {
-        setTex(path_to_ttf, size, color, text);
+    SpriteTextComponent(const char* p_path_to_ttf, int p_size, SDL_Color p_color, const char* text) {
+        path_to_ttf = p_path_to_ttf;
+        size = p_size;
+        color = p_color;
+
+        setText(text);
+
     }
     ~SpriteTextComponent() override {
         SDL_DestroyTexture(tex);
     }
 
-    void setTex(const char* path_to_ttf, int size, SDL_Color color, const char* text) {
-        tex = TextureManager::LoadTTFTexture(path_to_ttf, size, color, text, srcRect.w, srcRect.h);
+    void setText(const char* text) {
+        if (strcmp(text, "") == 0) {
+            text = ".";
+        }
+        std::cout << "setText" << std::endl;
+        std::cout << text << std::endl;
+        tex = TextureManager::LoadTTFTexture(path_to_ttf, size, color, text, srcRect);
+        std::cout << "setText 2" << std::endl;
+
     }
 
     void init() override {
@@ -44,6 +56,9 @@ private:
     TransformComponent *transform;
     SDL_Texture * tex;
     SDL_Rect srcRect, dstRect;
+    const char* path_to_ttf;
+    int size;
+    SDL_Color color;
 };
 
 #endif //GAME_SDL2_SPRITETEXTCOMPONENT_H
