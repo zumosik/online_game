@@ -36,3 +36,5 @@ target_link_libraries(game_sdl2
         ${Boost_LIBRARIES}
         ws2_32
 )
+
+file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION cmake-build-debug)
