@@ -50,7 +50,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
         return;
     }
 
-    std::cout << "eu1" << std::endl;
 
     if (TTF_Init() == 0) {
         std::cout << "Sdl ttf initiated" << std::endl;
@@ -60,7 +59,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
         return;
     }
 
-    std::cout << "eu2" << std::endl;
 
 
     if (!IMG_Init(IMG_INIT_PNG))
@@ -94,11 +92,10 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     player.addComponent<BoxColliderComponent>("player");
 
 
-    std::cout << "eu3" << std::endl;
 
     SDL_Color col = {0,0,0};
-    text.addComponent<TransformComponent>();
-    text.addComponent<TextComponent>("res/font.ttf", 32, col);
+    text.addComponent<TransformComponent>(Vector2f(0,400), 0, 32, 32, 2);
+    text.addComponent<SpriteTextComponent>("res/font.ttf", 32, col, "Hello world!");
 
 //
 //    wall.addComponent<TransformComponent>(Vector2f(300,300),0, 300, 20, 1);
