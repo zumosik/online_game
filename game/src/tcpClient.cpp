@@ -101,6 +101,8 @@ void TCPClient::handleUpdate() {
                         << ", " << packet.payload.newPlayerConnect.player.id
                             << std::endl;
 
+            Game::SpawnNewPlayer(&packet.payload.newPlayerConnect);
+
             break;
         }
         case PACKET_DISCONNECT_RESP: {

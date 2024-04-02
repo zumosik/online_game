@@ -33,6 +33,8 @@ public:
     static std::vector<BoxColliderComponent*> colliders;
 
     static void InitializePlayer(ConnectResp* req);
+    static void SpawnNewPlayer(NewPlayerConnect* req);
+
     static void SetPing(std::chrono::milliseconds duration);
 private:
     static std::chrono::milliseconds  ping;

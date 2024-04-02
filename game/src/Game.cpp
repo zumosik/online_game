@@ -31,14 +31,17 @@ SDL_Event Game::event;
 
 std::vector<BoxColliderComponent*> Game::colliders;
 
-auto& player(manager.addEntity());
-auto& wall(manager.addEntity());
+Entity& player(manager.addEntity());
 
-auto& text (manager.addEntity());
+std::vector<Entity*> otherPlayers;
 
-auto& tile10(manager.addEntity());
-auto& tile11(manager.addEntity());
-auto& tile12(manager.addEntity());
+Entity& wall(manager.addEntity());
+
+Entity& text (manager.addEntity());
+
+Entity& tile10(manager.addEntity());
+Entity& tile11(manager.addEntity());
+Entity& tile12(manager.addEntity());
 
 
 Game::Game() = default;
@@ -192,4 +195,14 @@ void Game::InitializePlayer(ConnectResp *resp) {
 
 void Game::SetPing(std::chrono::milliseconds duration) {
     ping = duration;
+}
+
+void Game::SpawnNewPlayer(NewPlayerConnect *req) {
+//    otherPlayers.push_back(&player);
+    Entity& otherPlayer(manager.addEntity());
+    player.addComponent<TransformComponent>(req->player.pos, 0, 32, 32);
+    player.addComponent<SpriteComponent>("res/imgs/star.png");
+    player.addGroup(GROUP_PLAYERS);
+
+    otherPlayers.push_back(&otherPlayer);
 }
