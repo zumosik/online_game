@@ -11,6 +11,7 @@ void Packet::Serialize(Buffer &buffer) const {
         case CONNECT_RESP:
             payload.connectResp.Write(buffer);
             break;
+            // TODO: add more cases idk
         default:
             break;
     }
@@ -29,11 +30,29 @@ void Packet::Deserialize(Buffer &buffer) {
             ConnectReq v;
             v.Read(buffer);
             payload.connectReq = v;
+            break;
         }
         case CONNECT_RESP: {
             ConnectResp v;
             v.Read(buffer);
             payload.connectResp = v;
+            break;
+        }
+        case NEW_PLAYER_CONNECT: {
+            NewPlayerConnect v;
+            v.Read(buffer);
+            payload.newPlayerConnect = v;
+            break;
+        }
+        case PACKET_DISCONNECT_REQ: {
+            DisconnectReq v;
+            // TODO
+            break;
+        }
+        case PACKET_DISCONNECT_RESP: {
+            DisconnectResp v;
+            // TODO
+            break;
         }
         default:
             break;
@@ -58,8 +77,21 @@ void ConnectResp::Write(Buffer &buffer) const {
     buffer.WriteChar( alreadyExists);
     Player::Write(buffer, player);
 }
+
 void ConnectResp::Read(Buffer &buffer) {
+    std::cout << "read" << std::endl;
     ok = buffer.ReadChar();
     alreadyExists = buffer.ReadChar();
+    player.Read(buffer);
+
+    std::cout << "username: " << player.username << std::endl;
+    std::cout << "ok, ae: " << ok << alreadyExists << std::endl;
+}
+
+void NewPlayerConnect::Write(Buffer &buffer) const {
+    Player::Write(buffer, player);
+}
+
+void NewPlayerConnect::Read(Buffer &buffer) {
     player.Read(buffer);
 }

@@ -28,11 +28,8 @@ public:
         if (strcmp(text, "") == 0) {
             text = ".";
         }
-        std::cout << "setText" << std::endl;
         std::cout << text << std::endl;
         tex = TextureManager::LoadTTFTexture(path_to_ttf, size, color, text, srcRect);
-        std::cout << "setText 2" << std::endl;
-
     }
 
     void init() override {

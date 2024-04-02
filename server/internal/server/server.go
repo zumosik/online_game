@@ -198,6 +198,8 @@ func (s *Server) SendToClient(conn net.Conn, payload Payload) error {
 	switch payload.(type) {
 	case *ConnectResp:
 		typeOfPacket = TypeOfPacketConnectResp
+	case *NewPlayerConnect:
+		typeOfPacket = TypeOfPacketNewPlayerConnect
 	default:
 		return ErrInvalidType
 	}

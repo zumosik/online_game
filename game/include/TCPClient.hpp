@@ -28,4 +28,5 @@ private:
 
     void sendBytes(Buffer& buf);
     void sendConnectReq(const ConnectReq& req);
+    void handleUpdate();
 };
