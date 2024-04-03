@@ -4,18 +4,18 @@ project(game_sdl2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 
-set(SDL2_PATH "C:/SDL2")
-set(SDL2_IMAGE_PATH "C:/SDL2_image")
-
 find_package(Boost 1.84.0 REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
-include(cmake_modules/FindSDL2_image.cmake)
-include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
-include_directories(${SDL2_INCLUDE_DIR})
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(include)
-
+include_directories(
+        ${SDL2_INCLUDE_DIR}
+        ${SDL2_IMAGE_INCLUDE_DIRS}
+        ${SDL2_TTF_INCLUDE_DIRS}
+        ${Boost_INCLUDE_DIRS}
+        include
+)
 
 add_executable(game_sdl2
         src/main.cpp
@@ -27,5 +27,15 @@ add_executable(game_sdl2
         src/textureManager.cpp
         src/Map.cpp
         src/Collision.cpp
+        src/ecs.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARIES} ${Boost_LIBRARIES} ws2_32)
+
+target_link_libraries(game_sdl2
+        ${SDL2_LIBRARY}
+        ${SDL2_IMAGE_LIBRARIES}
+        ${SDL2_TTF_LIBRARIES}
+        ${Boost_LIBRARIES}
+        ws2_32
+)
+
+file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION cmake-build-debug)

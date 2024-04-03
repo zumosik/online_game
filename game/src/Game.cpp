@@ -12,22 +12,36 @@
 #include "ECS/Components.h"
 #include "Collision.h"
 
+#include "SDL_ttf.h"
+
+enum groupLabels : std::size_t {
+    GROUP_MAP,
+    GROUP_PLAYERS,
+    GROUP_UI,
+};
 
 //Map *map;
 
 SDL_Renderer* Game::renderer = nullptr;
+std::chrono::milliseconds Game::ping = std::chrono::milliseconds();
+std::chrono::milliseconds Game::prev_ping = std::chrono::milliseconds();
 
 Manager manager;
 SDL_Event Game::event;
 
 std::vector<BoxColliderComponent*> Game::colliders;
 
-auto& player(manager.addEntity());
-auto& wall(manager.addEntity());
+Entity& player(manager.addEntity());
 
-auto& tile10(manager.addEntity());
-auto& tile11(manager.addEntity());
-auto& tile12(manager.addEntity());
+std::vector<Entity*> otherPlayers;
+
+Entity& wall(manager.addEntity());
+
+Entity& text (manager.addEntity());
+
+Entity& tile10(manager.addEntity());
+Entity& tile11(manager.addEntity());
+Entity& tile12(manager.addEntity());
 
 
 Game::Game() = default;
@@ -45,6 +59,17 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
         isRunning = false;
         return;
     }
+
+
+    if (TTF_Init() == 0) {
+        std::cout << "Sdl ttf initiated" << std::endl;
+    } else {
+        std::cerr << "Can initialize SDL_TTF: " << SDL_GetError() << std::endl;
+        isRunning = false;
+        return;
+    }
+
+
 
     if (!IMG_Init(IMG_INIT_PNG))
         std::cout << "IMG_Init has failed. Error: " << SDL_GetError() << std::endl;
@@ -64,8 +89,13 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 //    map = new Map();
 
     tile10.addComponent<TileComponent>(200,200,32,32,GRASS);
+    tile10.addGroup(GROUP_MAP);
+
     tile11.addComponent<TileComponent>(250,250,32,32,GRASS);
+    tile11.addGroup(GROUP_MAP);
+
     tile12.addComponent<TileComponent>(300,300,32,32,GRASS);
+    tile12.addGroup(GROUP_MAP);
 
     tile10.addComponent<BoxColliderComponent>("grass");
     tile11.addComponent<BoxColliderComponent>("grass");
@@ -75,6 +105,17 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     player.addComponent<SpriteComponent>("res/imgs/star.png");
     player.addComponent<KeyboardControllerComponent>();
     player.addComponent<BoxColliderComponent>("player");
+    player.addGroup(GROUP_PLAYERS);
+
+
+    SDL_Color col = {0,0,0};
+    text.addComponent<TransformComponent>(Vector2f(0,400), 0, 32, 32, 2);
+    if (!text.hasComponent<SpriteTextComponent>()) {
+        text.addComponent<SpriteTextComponent>("res/font.ttf", 32, col, "");
+    }
+    text.getComponent<SpriteTextComponent>().setText("text");
+    text.addGroup(GROUP_UI);
+
 //
 //    wall.addComponent<TransformComponent>(Vector2f(300,300),0, 300, 20, 1);
 //    wall.addComponent<SpriteComponent>("res/imgs/grass.png");
@@ -85,6 +126,13 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 void Game::update() {
     manager.refresh();
     manager.update();
+
+    if (ping != prev_ping) {
+        std::string str =  "Ping: " + std::to_string(ping.count()) + "ms";
+        text.getComponent<SpriteTextComponent>().setText(str.c_str());
+        prev_ping = ping;
+    }
+
 
     for (auto c : colliders) {
         if (Collision::AABB(&player.getComponent<BoxColliderComponent>(), c))
@@ -105,11 +153,29 @@ void Game::handleEvents() {
             break;
     }
 }
+
+
+auto& tiles(manager.getGroup(GROUP_MAP));
+auto& players(manager.getGroup(GROUP_PLAYERS));
+auto& ui(manager.getGroup(GROUP_UI));
+
 void Game::render() {
     SDL_RenderClear(renderer);
 
 //    map->DrawMap();
-    manager.draw();
+//    manager.draw();
+
+    for (auto& t: tiles) {
+        t->draw();
+    }
+
+    for(auto& p : players) {
+        p->draw();
+    }
+
+    for (auto & e : ui) {
+        e->draw();
+    }
 
     SDL_RenderPresent(renderer);
 
@@ -126,3 +192,19 @@ void Game::InitializePlayer(ConnectResp *resp) {
     player.addComponent<PlayerInfoComponent>(resp->player.username, resp->player.id, resp->player.pos);
     std::cout << "InitializePlayer, id = " << resp->player.id   << std::endl;
 }
+
+
+void Game::SetPing(std::chrono::milliseconds duration) {
+    ping = duration;
+}
+
+void Game::SpawnNewPlayer(NewPlayerConnect *req) {
+//    otherPlayers.push_back(&player);
+    Entity& otherPlayer(manager.addEntity());
+    player.addComponent<TransformComponent>(req->player.pos, 0, 32, 32);
+    player.addComponent<SpriteComponent>("res/imgs/star.png");
+    player.addGroup(GROUP_PLAYERS);
+
+    otherPlayers.push_back(&otherPlayer);
+}
+

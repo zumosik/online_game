@@ -44,7 +44,8 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 		}
 	}
 
-	for cl := range s.playerMap {
+	for cl := range s.playerMap { // sending to other clients
+		s.l.Debug("Sending NewPlayerConnect packet", utils.Wrap("player addr", cl.RemoteAddr().String()))
 		var req NewPlayerConnect
 		req.Player = pl
 		err := s.SendToClient(cl, &req)

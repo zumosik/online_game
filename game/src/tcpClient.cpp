@@ -43,29 +43,24 @@ void TCPClient::stop() {
 }
 
 void TCPClient::update() {
+
     socket_.async_read_some(boost::asio::buffer(buffer_),
                             [&](std::error_code ec, std::size_t length) {
                                 if (!ec) {
-                                    Buffer buff(buffer_);
-                                    std::cout << "\nGot from server:" << std::endl;
-                                    buff.Print();
 
-                                    Packet packet;
-                                    packet.Deserialize(buff);
+                                    handleUpdate(); // all main work happens here
 
-                                    std::cout << packet.packetType << std::endl;
-                                    if (packet.packetType == CONNECT_RESP) {
-                                        if (packet.payload.connectResp.ok) {
-                                            std::cout << "Server registered this connection" << std::endl;
+                                    // --------------------------------------------------------------
 
-                                            Game::InitializePlayer(&packet.payload.connectResp);
-                                        } else {
-                                            std::cout << "Server could not register this connection, exiting..." << std::endl;
-                                            abort();
-                                        }
+                                    auto end_time = std::chrono::steady_clock::now();
+                                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+                                    duration++; // with local server ping can be 0
+
+                                    std::cout << "Round-trip time: " << duration.count() << " ms" << std::endl;
 
 
-                                    }
+                                    Game::SetPing(duration);
+
 
 
 
@@ -77,7 +72,55 @@ void TCPClient::update() {
                             });
 }
 
+void TCPClient::handleUpdate() {
+    // to buffer_ data is placed in update func
+    Buffer buff(buffer_);
+    std::cout << "\nGot from server:" << std::endl;
+    buff.Print();
+
+    Packet packet;
+    packet.Deserialize(buff);
+
+    switch (packet.packetType) {
+        case EMPTY:
+            std::cout << "Empty packet..." << std::endl;
+            break;
+        case CONNECT_RESP : {
+            std::cout << packet.payload.connectResp.ok << std::endl;
+            std::cout << packet.payload.connectResp.player.id << std::endl;
+            if (packet.payload.connectResp.ok) {
+                std::cout << "Server registered this connection" << std::endl;
+
+                Game::InitializePlayer(&packet.payload.connectResp);
+            } else {
+                std::cout << "Server could not register this connection, exiting..." << std::endl;
+                abort();
+            }
+
+            break;
+        }
+        case NEW_PLAYER_CONNECT: {
+
+            std::cout << "New player connected: " << packet.payload.newPlayerConnect.player.username
+                        << ", " << packet.payload.newPlayerConnect.player.id
+                            << std::endl;
+
+            Game::SpawnNewPlayer(&packet.payload.newPlayerConnect);
+
+            break;
+        }
+        case PACKET_DISCONNECT_RESP: {
+            // TODO
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+
 void TCPClient::sendBytes(Buffer& buf) {
+    start_time = std::chrono::steady_clock::now();
     async_write(socket_, boost::asio::buffer(buf.GetData(), buf.GetIndex()),
                 [](const boost::system::error_code& ec, std::size_t /*bytes_transferred*/) {
                     if (ec) {
@@ -96,3 +139,4 @@ void TCPClient::sendConnectReq(const ConnectReq& req) {
 
     sendBytes(buf);
 }
+

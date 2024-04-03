@@ -37,6 +37,3 @@ Thumbs.db
 # Ignore all files in cmake-build-debug directory
 cmake-build-debug/*
 
-# Except for DLL files
-!cmake-build-debug/*.dll
-!cmake-build-debug/res/
