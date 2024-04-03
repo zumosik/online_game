@@ -131,14 +131,17 @@ void Player::Write(Buffer &buf, const Player &pl) {
 
 
 Player &Player::Read(Buffer &buf) {
+    Player pl;
     id = buf.ReadShort();
     auto len = buf.ReadInteger();
 
 
     for (int i = 0; i < len; ++i)
-        username[i] = buf.ReadChar();
+        pl.username[i] = buf.ReadChar();
 
     // Null-terminate the username to make it a valid C-string
     username[len] = '\0';
     pos.Read(buf);
 
+    return *this;
+}

@@ -1,0 +1,42 @@
+# CMake build directory
+build/
+
+# Generated Makefiles
+CMakeFiles/
+
+# Compiled binaries
+*.exe
+*.out
+*.dll
+*.so
+*.dylib
+
+# Object files
+*.o
+*.obj
+
+# Compiled static libraries
+*.a
+*.lib
+
+# Dependency files
+*.d
+
+# Generated documentation
+doc/
+
+# IDE specific files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+
+# Ignore all files in cmake-build-debug directory
+cmake-build-debug/*
+
+# Except for DLL files
+!cmake-build-debug/*.dll
+!cmake-build-debug/res/
