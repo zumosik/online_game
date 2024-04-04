@@ -1,6 +1,7 @@
 #include "TextureManager.h"
 #include "Game.h"
-#include "SDL_ttf.h"
+#include "SDL2/SDL_ttf.h"
+#include <iostream>
 
 SDL_Texture *TextureManager::LoadTexture(const char *fileName) {
     SDL_Surface* tmpSurface = IMG_Load(fileName);

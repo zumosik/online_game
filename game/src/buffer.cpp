@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Buffer.hpp"
+#include "Buffer.h"
 
 void Buffer::AppendByteToFront(uint8_t byte) {
     if (index < size) {

@@ -2,7 +2,7 @@
 // Created by a on 15.03.2024.
 //
 
-#include "Types.hpp"
+#include "Types.h"
 
 Vector2f::Vector2f() {x = 0.0f; y = 0.0f;}
 
@@ -142,3 +142,4 @@ Player &Player::Read(Buffer &buf) {
     username[len] = '\0';
     pos.Read(buf);
 
+}

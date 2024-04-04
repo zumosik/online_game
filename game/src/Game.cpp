@@ -12,7 +12,9 @@
 #include "ECS/Components.h"
 #include "Collision.h"
 
-#include "SDL_ttf.h"
+#include "Packet.h"
+
+#include "SDL2/SDL_ttf.h"
 
 enum groupLabels : std::size_t {
     GROUP_MAP,
@@ -52,27 +54,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
     if (fullscreen) flags = SDL_WINDOW_FULLSCREEN;
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
-        std::cout << "Sdl initiated" << std::endl;
-    } else {
-        std::cerr << "Can initialize SDL: " << SDL_GetError() << std::endl;
-        isRunning = false;
-        return;
-    }
-
-
-    if (TTF_Init() == 0) {
-        std::cout << "Sdl ttf initiated" << std::endl;
-    } else {
-        std::cerr << "Can initialize SDL_TTF: " << SDL_GetError() << std::endl;
-        isRunning = false;
-        return;
-    }
-
-
-
-    if (!IMG_Init(IMG_INIT_PNG))
-        std::cout << "IMG_Init has failed. Error: " << SDL_GetError() << std::endl;
+    
 
     window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
     if (window) {

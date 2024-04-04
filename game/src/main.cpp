@@ -1,10 +1,10 @@
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+
 #include <iostream>
-#include <winsock2.h> // Very important to compile code
-#include <windows.h> // Windows support
 #include <thread>
-#include "TCPClient.hpp"
+#include "TCPClient.h"
 #include "Game.h"
 
 boost::asio::io_context io_context;
@@ -14,15 +14,28 @@ void runIoContext() {
     io_context.run();
 }
 
-// Define WinMain as the entry point for Windows GUI applications
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    std::cout << "start" << std::endl;
-    // Init sdl...
-//    if (SDL_Init(SDL_INIT_VIDEO) > 0)
-//        std::cout << "SDL_Init has failed. SDL_ERROR: " << SDL_GetError() << std::endl;
-//
-//    if (!IMG_Init(IMG_INIT_PNG))
-//        std::cout << "IMG_Init has failed. Error: " << SDL_GetError() << std::endl;
+int main(int argc, char* argv[]) {
+    if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
+        std::cout << "Sdl initiated" << std::endl;
+    } else {
+        std::cerr << "Cant initialize SDL: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    
+    if (!IMG_Init(IMG_INIT_PNG)) {
+        std::cout << "IMG_Init has failed. Error: " << SDL_GetError() << std::endl;
+        return 1;
+    } else {
+        std::cout << "Sdl image initiated";
+    }
+
+    if (TTF_Init() == 0) {
+        std::cout << "Sdl ttf initiated" << std::endl;
+    } else {
+        std::cerr << "Can initialize SDL_TTF: " << SDL_GetError() << std::endl;
+        return 1;
+    }
 
 
     // Connect to TCP

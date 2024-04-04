@@ -5,7 +5,7 @@
 #ifndef GAME_SDL2_SPRITETEXTCOMPONENT_H
 #define GAME_SDL2_SPRITETEXTCOMPONENT_H
 
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "TransformComponent.h"
 #include "TextureManager.h"
 

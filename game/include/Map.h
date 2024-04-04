@@ -6,7 +6,7 @@
 #define GAME_SDL2_MAP_H
 
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 class Map {
 public:

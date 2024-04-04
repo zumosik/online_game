@@ -6,7 +6,7 @@
 #define GAME_SDL2_BOXCOLLIDERCOMPONENT_H
 
 #include <string>
-#include "SDL.h"
+#include "SDL2/SDL.h"
 #include "ECS/Components.h"
 
 class BoxColliderComponent : public Component{
