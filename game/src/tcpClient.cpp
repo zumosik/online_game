@@ -25,7 +25,7 @@ void TCPClient::start(const std::string& addr, const int port_num, boost::asio::
                                        std::cout << "Connected to server" << std::endl;
 
                                        // sending connect msg to server
-                                       ConnectReq req("player_cpp");
+                                       ConnectReq req(username_, pin_);
                                        sendConnectReq(req);
 
 
@@ -50,21 +50,7 @@ void TCPClient::update() {
 
                                     handleUpdate(); // all main work happens here
 
-                                    // --------------------------------------------------------------
-
-                                    auto end_time = std::chrono::steady_clock::now();
-                                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-                                    duration++; // with local server ping can be 0
-
-                                    std::cout << "Round-trip time: " << duration.count() << " ms" << std::endl;
-
-
-                                    Game::SetPing(duration);
-
-
-
-
-                                    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 10 ms
+                                    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // wait 10 ms
                                     update(); // Continue reading
                                 } else {
                                     std::cerr << "Read error: " << ec.message() << std::endl;
@@ -120,7 +106,6 @@ void TCPClient::handleUpdate() {
 
 
 void TCPClient::sendBytes(Buffer& buf) {
-    start_time = std::chrono::steady_clock::now();
     async_write(socket_, boost::asio::buffer(buf.GetData(), buf.GetIndex()),
                 [](const boost::system::error_code& ec, std::size_t /*bytes_transferred*/) {
                     if (ec) {

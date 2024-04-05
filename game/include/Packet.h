@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <cstring>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include "Types.h"
@@ -12,16 +13,26 @@
 struct ConnectReq {
     uint32_t UsernameLen;
     char Username[20]{};
+    uint32_t Pin;
 
     explicit ConnectReq() {
         std::strncpy(Username, "", sizeof(Username) - 1);
         UsernameLen = static_cast<uint32_t>(std::strlen(Username));
+        Pin = 0;
     }
 
-    explicit ConnectReq(const char* username) {
+    explicit ConnectReq(const char* username, uint32_t p_pin) {
         std::strncpy(Username, username, sizeof(Username) - 1);
         Username[sizeof(Username) - 1] = '\0'; // Ensure null-terminated
         UsernameLen = static_cast<uint32_t>(std::strlen(Username));
+        Pin = p_pin;
+    }
+
+    explicit ConnectReq(std::string username, uint32_t p_pin) {
+         std::strncpy(Username, username.c_str(), sizeof(Username) - 1);
+        Username[sizeof(Username) - 1] = '\0'; // Ensure null-terminated
+        UsernameLen = static_cast<uint32_t>(std::strlen(Username));
+        Pin = p_pin;
     }
 
     void Write( Buffer & buffer ) const;

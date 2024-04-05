@@ -11,6 +11,9 @@ CMakeFiles/
 *.so
 *.dylib
 
+bin/debug/main
+bin/release/main
+
 # Object files
 *.o
 *.obj

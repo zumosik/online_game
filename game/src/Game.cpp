@@ -25,8 +25,6 @@ enum groupLabels : std::size_t {
 //Map *map;
 
 SDL_Renderer* Game::renderer = nullptr;
-std::chrono::milliseconds Game::ping = std::chrono::milliseconds();
-std::chrono::milliseconds Game::prev_ping = std::chrono::milliseconds();
 
 Manager manager;
 SDL_Event Game::event;
@@ -59,12 +57,16 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
     window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
     if (window) {
         std::cout << "Window created" << std::endl;
+    } else {
+        std::cerr << "Cant create window: " << SDL_GetError() << std::endl; 
     }
 
     renderer = SDL_CreateRenderer(window, -1, 0);
     if (renderer) {
         SDL_SetRenderDrawColor(renderer, 255,255,255,255);
         std::cout << "Renderer created" << std::endl;
+    } else {
+        std::cerr << "Cant create renderer: " << SDL_GetError() << std::endl; 
     }
 
     isRunning = true;
@@ -91,11 +93,11 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 
 
     SDL_Color col = {0,0,0};
-    text.addComponent<TransformComponent>(Vector2f(0,400), 0, 32, 32, 2);
+    text.addComponent<TransformComponent>(Vector2f(0,800), 0, 32, 32, 2);
     if (!text.hasComponent<SpriteTextComponent>()) {
         text.addComponent<SpriteTextComponent>("res/font.ttf", 32, col, "");
     }
-    text.getComponent<SpriteTextComponent>().setText("text");
+    text.getComponent<SpriteTextComponent>().setText("Hello world!");
     text.addGroup(GROUP_UI);
 
 //
@@ -108,12 +110,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
 void Game::update() {
     manager.refresh();
     manager.update();
-
-    if (ping != prev_ping) {
-        std::string str =  "Ping: " + std::to_string(ping.count()) + "ms";
-        text.getComponent<SpriteTextComponent>().setText(str.c_str());
-        prev_ping = ping;
-    }
 
 
     for (auto c : colliders) {
@@ -176,12 +172,10 @@ void Game::InitializePlayer(ConnectResp *resp) {
 }
 
 
-void Game::SetPing(std::chrono::milliseconds duration) {
-    ping = duration;
-}
-
 void Game::SpawnNewPlayer(NewPlayerConnect *req) {
 //    otherPlayers.push_back(&player);
+    std::cout << "New player: " << req->player.username  << std::endl;
+
     Entity& otherPlayer(manager.addEntity());
     player.addComponent<TransformComponent>(req->player.pos, 0, 32, 32);
     player.addComponent<SpriteComponent>("res/imgs/star.png");
