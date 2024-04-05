@@ -4,6 +4,7 @@ import (
 	"game/internal/game"
 	"game/internal/lib/logger/sl"
 	"game/internal/lib/logger/slogpretty"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"log/slog"
 	"os"
@@ -16,16 +17,22 @@ const (
 )
 
 func main() {
+	logger := setupLogger("local")
+
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
+		logger.Error("Cant init SDL2", sl.Err(err))
+		os.Exit(1)
 	}
 	defer sdl.Quit()
 
-	logger := setupLogger("local")
+	if err := img.Init(img.INIT_PNG); err != nil {
+		logger.Error("Cant init SDL2_image", sl.Err(err))
+		os.Exit(1)
+	}
 
-	g := game.New(logger)
+	g := game.New(logger, 60)
 
-	err := g.Start()
+	err := g.Start(800, 600)
 	if err != nil {
 		logger.Error("Error starting game", sl.Err(err))
 	}

@@ -10,3 +10,10 @@ func Err(err error) slog.Attr {
 		Value: slog.StringValue(err.Error()),
 	}
 }
+
+func Attr(s1, s2 string) slog.Attr {
+	return slog.Attr{
+		Key:   s1,
+		Value: slog.StringValue(s2),
+	}
+}
