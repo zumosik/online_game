@@ -1,129 +1,86 @@
 package game
 
 import (
-	"game/internal/game/texturemanager"
-	"game/internal/lib/logger/sl"
-	"github.com/veandco/go-sdl2/sdl"
-	"log/slog"
+	"game/internal/cm"
+	"game/internal/cm/components"
+	"game/internal/textures"
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Game struct {
-	isRunning bool
-	l         *slog.Logger
-	FPS       uint32
+	screenWidth  int32
+	screenHeight int32
+	fps          int32
+	title        string
+	running      bool
 
-	renderer *sdl.Renderer
-
-	// TMP
-	plTex *sdl.Texture // TODO: delete this after GameObject implementation
-	c     int
-	cc    int
+	tex     *textures.Textures
+	manager *cm.Manager
 }
 
-func New(logger *slog.Logger, FPS uint32) *Game {
+func New(w, h, fps int32, title string) *Game {
 	return &Game{
-		l:   logger,
-		FPS: FPS,
+		screenHeight: h,
+		screenWidth:  w,
+		fps:          fps,
+		title:        title,
+		running:      true,
 	}
 }
 
-func (g *Game) Start(w, h int32) error {
-	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, w, h, sdl.WINDOW_SHOWN)
-	if err != nil {
-		return err
-	}
-	defer func(window *sdl.Window) {
-		err := window.Destroy()
-		if err != nil {
-			g.l.Error("cant destroy window", sl.Err(err))
-		}
-	}(window)
+func (g *Game) Init() {
+	rl.InitWindow(g.screenWidth, g.screenHeight, g.title)
+	rl.SetTargetFPS(g.fps)
 
-	g.renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
-	if err != nil {
-		return err
-	}
-	defer func(renderer *sdl.Renderer) {
-		err := renderer.Destroy()
-		if err != nil {
-			g.l.Error("cant destroy renderer", sl.Err(err))
-		}
-	}(g.renderer)
+	g.tex = textures.Load()
 
-	tm := texturemanager.New(g.renderer)
+	rl.SetExitKey(rl.KeyNull)
 
-	g.plTex, err = tm.LoadTexture("assets/imgs/player.png")
-	if err != nil {
-		g.l.Error("cant load image", sl.Attr("path", "assets/imgs/player.png"), sl.Err(err))
-	}
+	g.manager = cm.NewManager()
+}
 
-	defer func(texture *sdl.Texture) {
-		err := texture.Destroy()
-		if err != nil {
-			g.l.Error("cant destory image", sl.Attr("path", "assets/imgs/player.png"), sl.Err(err))
-		}
-	}(g.plTex)
+func (g *Game) Start() {
+	player := g.manager.CreateGameObject()
+	player.AddComponent(&components.TransformComponent{
+		Pos:   rl.NewVector2(500, 200),
+		Size:  rl.NewVector2(48, 48),
+		Scale: rl.NewVector2(5, 5),
+	})
+	player.AddComponent(&components.SpriteComponent{
+		Tex:   g.tex.Player,
+		Color: rl.White,
+	})
 
-	g.isRunning = true
-
-	g.cc = 1
-	
-	for g.isRunning {
-
-		g.handleEvents()
+	for g.running {
+		g.handleInput()
+		g.update()
 		g.render()
-
-		sdl.Delay(1000 / g.FPS) // wait some time before next frame
 	}
+}
 
-	return nil
+func (g *Game) Quit() {
+	rl.CloseWindow()
+}
+
+func (g *Game) handleInput() {
+	// TODO
+}
+
+func (g *Game) update() {
+	g.running = !rl.WindowShouldClose()
+
+	g.manager.Update()
 }
 
 func (g *Game) render() {
+	rl.BeginDrawing()
 
-	if g.c > 50 {
-		g.cc = -1
-	}
-	if g.c < -50 {
-		g.cc = 1
-	}
+	rl.ClearBackground(rl.Color{R: 147, G: 211, B: 139, A: 255})
+	g.drawScene()
 
-	g.c += g.cc
-
-	if err := g.renderer.Clear(); err != nil {
-		g.l.Error("cant clear renderer")
-	}
-
-	for i := 0; i < 10; i++ {
-		for j := 0; j < 10; j++ {
-			if err := g.renderer.Copy(g.plTex, &sdl.Rect{
-				X: 0,
-				Y: 0,
-				W: 200,
-				H: 231,
-			}, &sdl.Rect{
-				X: (100 * int32(i)) + int32(g.c),
-				Y: (50 * int32(j)) + int32(g.c)*2,
-				W: 50,
-				H: 50,
-			}); err != nil {
-				g.l.Error("cant copy texture into renderer")
-			}
-		}
-	}
-
-	g.renderer.Present()
-
+	rl.EndDrawing()
 }
 
-func (g *Game) handleEvents() {
-	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch event.(type) {
-		case *sdl.QuitEvent:
-			g.l.Debug("Quit event...")
-			g.isRunning = false
-			break
-		}
-	}
-
+func (g *Game) drawScene() {
+	g.manager.Render()
 }
