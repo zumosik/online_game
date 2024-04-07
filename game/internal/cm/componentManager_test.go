@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+// TODO: add tests
+
 func TestGameObject_Components(t *testing.T) {
 	manager := cm.NewManager()
 

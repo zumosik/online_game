@@ -54,12 +54,11 @@ type GameObject struct {
 func (o *GameObject) AddComponent(component Component) {
 	log.Printf("add component: %v", component)
 
-	component.SetGameObject(o)
-	component.Init()
+	component.Init(o)
 	o.components = append(o.components, component)
 }
 
-func (o *GameObject) GetComponent(componentType interface{}) interface{} {
+func (o *GameObject) GetComponent(componentType Component) Component {
 	for _, c := range o.components {
 		if reflect.TypeOf(c) == reflect.TypeOf(componentType) {
 			log.Printf("get component: %v", c)
@@ -69,7 +68,7 @@ func (o *GameObject) GetComponent(componentType interface{}) interface{} {
 	return nil
 }
 
-func (o *GameObject) HasComponent(componentType interface{}) bool {
+func (o *GameObject) HasComponent(componentType Component) bool {
 	for _, c := range o.components {
 		if reflect.TypeOf(c) == reflect.TypeOf(componentType) {
 			return true
@@ -91,8 +90,7 @@ func (o *GameObject) Render() {
 }
 
 type Component interface {
-	Init()
+	Init(obj *GameObject)
 	Update()
 	Render()
-	SetGameObject(obj *GameObject)
 }

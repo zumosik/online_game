@@ -3,9 +3,15 @@ package components
 import (
 	"game/internal/cm"
 	rl "github.com/gen2brain/raylib-go/raylib"
-	"log"
 )
 
+// SpriteComponent stores value about pointer to texture and color.
+//
+// Init: gets transform and sets scrRect to transform size.
+// Update: sets render pos to transform pos, and size to transforms size * scale.
+// Render: renders texture.
+//
+// # Cant be used without TransformComponent.
 type SpriteComponent struct {
 	Tex   rl.Texture2D
 	Color rl.Color
@@ -18,11 +24,9 @@ type SpriteComponent struct {
 	obj *cm.GameObject // link to object that has this component
 }
 
-func (s *SpriteComponent) SetGameObject(obj *cm.GameObject) {
+func (s *SpriteComponent) Init(obj *cm.GameObject) {
 	s.obj = obj
-}
 
-func (s *SpriteComponent) Init() {
 	s.transform = s.obj.GetComponent(&TransformComponent{}).(*TransformComponent)
 
 	s.srcRect.X = 0
@@ -41,8 +45,6 @@ func (s *SpriteComponent) Update() {
 }
 
 func (s *SpriteComponent) Render() {
-	log.Printf("Render: %v, %v", s.srcRect, s.dstRect)
-
 	rl.DrawTexturePro(s.Tex, s.srcRect, s.dstRect,
 		rl.NewVector2(s.dstRect.Width, s.dstRect.Height),
 		s.transform.Rotation, s.Color)

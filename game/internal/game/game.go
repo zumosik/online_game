@@ -7,6 +7,10 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+var (
+	player *cm.GameObject
+)
+
 type Game struct {
 	screenWidth  int32
 	screenHeight int32
@@ -40,7 +44,7 @@ func (g *Game) Init() {
 }
 
 func (g *Game) Start() {
-	player := g.manager.CreateGameObject()
+	player = g.manager.CreateGameObject()
 	player.AddComponent(&components.TransformComponent{
 		Pos:   rl.NewVector2(500, 200),
 		Size:  rl.NewVector2(48, 48),
@@ -50,9 +54,10 @@ func (g *Game) Start() {
 		Tex:   g.tex.Player,
 		Color: rl.White,
 	})
+	player.AddComponent(&components.RigidbodyComponent{Velocity: rl.NewVector2(0, 0), Speed: 5})
+	player.AddComponent(&components.PlayerKeyboardComponent{TypeOfInput: components.WASDInput})
 
 	for g.running {
-		g.handleInput()
 		g.update()
 		g.render()
 	}
@@ -60,10 +65,6 @@ func (g *Game) Start() {
 
 func (g *Game) Quit() {
 	rl.CloseWindow()
-}
-
-func (g *Game) handleInput() {
-	// TODO
 }
 
 func (g *Game) update() {

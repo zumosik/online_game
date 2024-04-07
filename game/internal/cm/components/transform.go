@@ -5,7 +5,14 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
-type TransformComponent struct { // this component only store values
+// TransformComponent stores value about pos, size, rotation and scale.
+//
+// Init: sets scale to 1 if it was 0.
+// Update: none.
+// Render: none.
+//
+// # TransformComponent is the most important component, a lot of other components rely on it.
+type TransformComponent struct {
 	Pos  rl.Vector2
 	Size rl.Vector2
 
@@ -15,11 +22,9 @@ type TransformComponent struct { // this component only store values
 	obj *cm.GameObject // link to object that has this component
 }
 
-func (t *TransformComponent) SetGameObject(obj *cm.GameObject) {
+func (t *TransformComponent) Init(obj *cm.GameObject) {
 	t.obj = obj
-}
 
-func (t *TransformComponent) Init() {
 	if t.Scale.X == 0 {
 		t.Scale.X = 1
 	}
