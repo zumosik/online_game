@@ -1,4 +1,4 @@
-# Product Name
+# Online game
 > Multiplayer game from scratch, written fully in Go
 
 [![Built with Go](https://img.shields.io/badge/Built%20with-Go-00ADD8.svg)](https://golang.org/)
