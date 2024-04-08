@@ -6,17 +6,18 @@ import (
 	"net"
 	"online_game/internal/lib/logger/sl"
 	"online_game/internal/models"
+	"online_game/internal/packets"
 )
 
-func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
+func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets.ConnectResp {
 	_, exists := s.playerMap[conn]
 	if exists { // already connected
-		return ConnectResp{OK: false}
+		return packets.ConnectResp{OK: false}
 	}
 
 	for _, pl := range s.playerMap {
 		if pl.Username == req.Username {
-			return ConnectResp{OK: false} // someone is already playing
+			return packets.ConnectResp{OK: false} // someone is already playing
 		}
 	}
 
@@ -40,13 +41,13 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 		s.save.Players[pl.Username] = pl
 	} else {
 		if pl.Pin != req.Pin { // check "password"
-			return ConnectResp{OK: false} // pin doesnt match
+			return packets.ConnectResp{OK: false} // pin doesnt match
 		}
 	}
 
 	for cl := range s.playerMap { // sending to other clients
 		s.l.Debug("Sending NewPlayerConnect packet", sl.Attr("player addr", cl.RemoteAddr().String()))
-		var req NewPlayerConnect
+		var req packets.NewPlayerConnect
 		req.Player = pl
 		err := s.SendToClient(cl, &req)
 		if err != nil {
@@ -58,11 +59,11 @@ func (s *Server) handleConnectReq(req ConnectReq, conn net.Conn) ConnectResp {
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(pl.UserID)))
 
-	return ConnectResp{OK: true, AlreadyExists: playerExists, Player: pl}
+	return packets.ConnectResp{OK: true, AlreadyExists: playerExists, Player: pl}
 
 }
 
-func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) {
+func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
 
 	player, exists := s.playerMap[conn]
 	if !exists && player.UserID != req.ID {
@@ -73,7 +74,7 @@ func (s *Server) handlePlayerPosReq(req PlayerPosReq, conn net.Conn) {
 	s.playerMap[conn] = player
 }
 
-func (s *Server) handleDisconnect(req DisconnectReq, conn net.Conn) {
+func (s *Server) handleDisconnect(req packets.DisconnectReq, conn net.Conn) {
 	s.connClose(conn)
 }
 

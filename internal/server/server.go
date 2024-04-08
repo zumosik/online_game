@@ -8,6 +8,7 @@ import (
 	"net"
 	"online_game/internal/lib/logger/sl"
 	"online_game/internal/models"
+	"online_game/internal/packets"
 	"online_game/internal/saver"
 	"os"
 	"os/signal"
@@ -20,7 +21,7 @@ var (
 
 type Message struct {
 	from   net.Conn
-	packet Packet
+	packet packets.Packet
 }
 
 type Config struct {
@@ -141,7 +142,7 @@ func (s *Server) readLoop(conn net.Conn) {
 	defer s.connClose(conn)
 
 	for {
-		packet, err := Deserialize(conn)
+		packet, err := packets.Deserialize(conn)
 		if err != nil {
 			if errors.Is(err, io.EOF) { // closed conn
 				s.l.Debug("conn closed", sl.Attr("addr", conn.RemoteAddr().String()))
@@ -164,19 +165,19 @@ func (s *Server) msgLoop() {
 			continue
 		}
 		switch msg.packet.TypeOfPacket {
-		case TypeOfPacketConnectReq:
-			req := msg.packet.Payload.(*ConnectReq)
+		case packets.TypeOfPacketConnectReq:
+			req := msg.packet.Payload.(*packets.ConnectReq)
 			resp := s.handleConnectReq(*req, msg.from)
 			err := s.SendToClient(msg.from, &resp)
 			if err != nil {
 				s.l.Error("cant send to client", sl.Err(err))
 				continue
 			}
-		case TypeOfPacketPlayerPosReq:
-			req := msg.packet.Payload.(*PlayerPosReq)
+		case packets.TypeOfPacketPlayerPosReq:
+			req := msg.packet.Payload.(*packets.PlayerPosReq)
 			s.handlePlayerPosReq(*req, msg.from)
-		case TypeOfPacketDisconnectReq:
-			req := msg.packet.Payload.(*DisconnectReq)
+		case packets.TypeOfPacketDisconnectReq:
+			req := msg.packet.Payload.(*packets.DisconnectReq)
 			s.handleDisconnect(*req, msg.from)
 		default:
 			// idk
@@ -188,15 +189,15 @@ func (s *Server) SendToClient(conn net.Conn, payload interface{}) error {
 	var typeOfPacket uint8
 
 	switch payload.(type) {
-	case *ConnectResp:
-		typeOfPacket = TypeOfPacketConnectResp
-	case *NewPlayerConnect:
-		typeOfPacket = TypeOfPacketNewPlayerConnect
+	case *packets.ConnectResp:
+		typeOfPacket = packets.TypeOfPacketConnectResp
+	case *packets.NewPlayerConnect:
+		typeOfPacket = packets.TypeOfPacketNewPlayerConnect
 	default:
 		return ErrInvalidType
 	}
 
-	packet := Packet{
+	packet := packets.Packet{
 		TypeOfPacket: typeOfPacket,
 		Payload:      payload,
 	}

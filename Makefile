@@ -18,7 +18,7 @@ build_game:
 	go build -o $(gameBinPath) ./cmd/game/main.go
 
 run_game:
-	./$(gameBinPath)
+	./$(gameBinPath) --config="./configs/game/local.yml"
 
 build_client:
 	go build -o $(clientBinPath) ./cmd/game/main.go
