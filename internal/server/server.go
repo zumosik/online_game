@@ -140,15 +140,32 @@ func (s *Server) acceptLoop() {
 
 func (s *Server) readLoop(conn net.Conn) {
 	defer s.connClose(conn)
+	buf := make([]byte, s.maxReadSize)
 
 	for {
-		packet, err := packets.Deserialize(conn)
+		n, err := conn.Read(buf)
+
 		if err != nil {
 			if errors.Is(err, io.EOF) { // closed conn
 				s.l.Debug("conn closed", sl.Attr("addr", conn.RemoteAddr().String()))
 				return
 			}
 			s.l.Error("cant read", sl.Err(err))
+		}
+
+		// check if something was read
+		if n == 0 {
+			continue
+		} else {
+			s.l.Debug("read", sl.Attr("bytes", fmt.Sprint(n)))
+		}
+
+		s.l.Debug("received data", sl.Attr("data", fmt.Sprintf("%v", buf[:n])))
+
+		packet, err := packets.DeserializePacket(buf)
+		if err != nil {
+			s.l.Error("cant deserialize packet", sl.Err(err))
+			continue
 		}
 
 		s.msgCh <- Message{
@@ -166,19 +183,19 @@ func (s *Server) msgLoop() {
 		}
 		switch msg.packet.TypeOfPacket {
 		case packets.TypeOfPacketConnectReq:
-			req := msg.packet.Payload.(*packets.ConnectReq)
-			resp := s.handleConnectReq(*req, msg.from)
-			err := s.SendToClient(msg.from, &resp)
+			req := msg.packet.Payload.(packets.ConnectReq)
+			resp := s.handleConnectReq(req, msg.from)
+			err := s.SendToClient(msg.from, resp)
 			if err != nil {
 				s.l.Error("cant send to client", sl.Err(err))
 				continue
 			}
 		case packets.TypeOfPacketPlayerPosReq:
-			req := msg.packet.Payload.(*packets.PlayerPosReq)
-			s.handlePlayerPosReq(*req, msg.from)
+			req := msg.packet.Payload.(packets.PlayerPosReq)
+			s.handlePlayerPosReq(req, msg.from)
 		case packets.TypeOfPacketDisconnectReq:
-			req := msg.packet.Payload.(*packets.DisconnectReq)
-			s.handleDisconnect(*req, msg.from)
+			req := msg.packet.Payload.(packets.DisconnectReq)
+			s.handleDisconnect(req, msg.from)
 		default:
 			// idk
 		}
@@ -189,9 +206,9 @@ func (s *Server) SendToClient(conn net.Conn, payload interface{}) error {
 	var typeOfPacket uint8
 
 	switch payload.(type) {
-	case *packets.ConnectResp:
+	case packets.ConnectResp:
 		typeOfPacket = packets.TypeOfPacketConnectResp
-	case *packets.NewPlayerConnect:
+	case packets.NewPlayerConnect:
 		typeOfPacket = packets.TypeOfPacketNewPlayerConnect
 	default:
 		return ErrInvalidType
@@ -202,7 +219,13 @@ func (s *Server) SendToClient(conn net.Conn, payload interface{}) error {
 		Payload:      payload,
 	}
 
-	err := packet.Serialize(conn)
+	data, err := packets.SerializePacket(packet)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Write(data)
+
 	return err
 }
 

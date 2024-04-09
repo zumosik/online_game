@@ -24,7 +24,8 @@ type ConnectReq struct {
 type ConnectResp struct {
 	OK            bool
 	AlreadyExists bool // if player already was in save
-	Player        models.Player
+	Username      string
+	UserID        uint16
 }
 
 type PlayerPosReq struct {

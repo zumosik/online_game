@@ -1,59 +1,61 @@
 package packets
 
 import (
+	"errors"
+
 	"github.com/zumosik/bb-marshaling"
-	"io"
-	"log"
 )
+
+var ErrInvalidPacketType = errors.New("invalid packet type") // Error for invalid packet type. (If we cant handle it.)
 
 // Packet struct represents a packet of data to be sent over the network.
 // It consists of a type and a payload.
+// Payloads are defined in the payloads_type.go file.
 type Packet struct {
 	TypeOfPacket uint8       // TypeOfPacket represents the type of the packet as a single byte.
 	Payload      interface{} // Payload can be any type of data.
 }
 
-// Serialize method takes an io.Writer and writes the TypeOfPacket as a single byte,
-// followed by the Payload encoded using the bb-marshaling package.
-// If there's an error at any point, it returns the error.
-func (p Packet) Serialize(w io.Writer) error {
-	// Write the TypeOfPacket to the writer.
-	_, err := w.Write([]byte{p.TypeOfPacket})
-	if err != nil {
-		return err
+// SerializePacket method takes a Packet and returns it byte representation.
+func SerializePacket(p Packet) ([]byte, error) {
+	// Serialize payload.
+	data := make([]byte, 0)
+	var err error
+	// To Marshall we need to get struct type (doesnt work with interface{}).
+
+	switch p.TypeOfPacket {
+	case TypeOfPacketConnectResp:
+		v := p.Payload.(ConnectResp)
+		data, err = bb.Marshall(v)
+	// TODO add more cases here.
+	default:
+		return []byte{}, ErrInvalidPacketType
 	}
 
-	// Encode the Payload and write it to the writer.
-	if err := bb.NewEncoder(w).Encode(p.Payload); err != nil {
-		return err
-	}
+	// Add packet type to start of array.
+	packet := append([]byte{p.TypeOfPacket}, data...)
 
-	return nil
+	return packet, err
 }
 
-// Deserialize method takes an io.Reader and reads the TypeOfPacket and Payload from it,
-// using the bb-marshaling package for the payload.
-// If there's an error at any point, it returns an empty Packet and the error.
-func Deserialize(r io.Reader) (Packet, error) {
-	// Buffer to hold the packet type.
-	var buf [1]byte
-	var packet Packet
+// DeserializePacket method takes a byte array and returns a Packet.
+func DeserializePacket(data []byte) (Packet, error) {
+	var p Packet
 
-	// Read the packet type from the reader.
-	_, err := r.Read(buf[:])
-	if err != nil {
-		return Packet{}, err
-	}
-	packet.TypeOfPacket = buf[0]
+	// Get packet type.
+	p.TypeOfPacket = data[0]
 
-	log.Println("Packet type:", packet.TypeOfPacket)
-
-	// Decode the payload from the reader.
-	if err := bb.NewDecoder(r).Decode(&packet.Payload); err != nil {
-		return Packet{}, err
+	// To Unmarshall we need to get struct type (doesnt work with interface{}).
+	var err error
+	switch p.TypeOfPacket {
+	case TypeOfPacketConnectReq:
+		var v ConnectReq
+		err = bb.Unmarshall(data[1:], &v)
+		p.Payload = v
+	// TODO add more cases here.
+	default:
+		return Packet{}, ErrInvalidPacketType
 	}
 
-	log.Printf("Received packet: TypeOfPacket=%v, Payload=%v\n", packet.TypeOfPacket, packet.Payload)
-
-	return Packet{}, nil
+	return p, err
 }

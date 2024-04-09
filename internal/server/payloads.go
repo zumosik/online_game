@@ -10,6 +10,7 @@ import (
 )
 
 func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets.ConnectResp {
+	s.l.Debug("Handling ConnectReq", sl.Attr("username", req.Username), sl.Attr("pin", string(req.Pin)))
 	_, exists := s.playerMap[conn]
 	if exists { // already connected
 		return packets.ConnectResp{OK: false}
@@ -59,7 +60,9 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(pl.UserID)))
 
-	return packets.ConnectResp{OK: true, AlreadyExists: playerExists, Player: pl}
+	return packets.ConnectResp{OK: true, AlreadyExists: playerExists,
+		Username: pl.Username, UserID: pl.UserID,
+	}
 
 }
 
