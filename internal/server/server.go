@@ -226,6 +226,8 @@ func (s *Server) SendToClient(conn net.Conn, payload interface{}) error {
 
 	_, err = conn.Write(data)
 
+	s.l.Debug("sent data", sl.Attr("data", fmt.Sprintf("%v", data)))
+
 	return err
 }
 

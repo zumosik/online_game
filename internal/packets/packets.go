@@ -24,6 +24,9 @@ func SerializePacket(p Packet) ([]byte, error) {
 	// To Marshall we need to get struct type (doesnt work with interface{}).
 
 	switch p.TypeOfPacket {
+	case TypeOfPacketConnectReq:
+		v := p.Payload.(ConnectReq)
+		data, err = bb.Marshall(v)
 	case TypeOfPacketConnectResp:
 		v := p.Payload.(ConnectResp)
 		data, err = bb.Marshall(v)
@@ -50,6 +53,10 @@ func DeserializePacket(data []byte) (Packet, error) {
 	switch p.TypeOfPacket {
 	case TypeOfPacketConnectReq:
 		var v ConnectReq
+		err = bb.Unmarshall(data[1:], &v)
+		p.Payload = v
+	case TypeOfPacketConnectResp:
+		var v ConnectResp
 		err = bb.Unmarshall(data[1:], &v)
 		p.Payload = v
 	// TODO add more cases here.

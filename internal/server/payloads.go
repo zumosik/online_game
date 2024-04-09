@@ -7,10 +7,14 @@ import (
 	"online_game/internal/lib/logger/sl"
 	"online_game/internal/models"
 	"online_game/internal/packets"
+	"time"
 )
 
 func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets.ConnectResp {
 	s.l.Debug("Handling ConnectReq", sl.Attr("username", req.Username), sl.Attr("pin", string(req.Pin)))
+
+	time.Sleep(2 * time.Second) // Simulate slow connection
+
 	_, exists := s.playerMap[conn]
 	if exists { // already connected
 		return packets.ConnectResp{OK: false}

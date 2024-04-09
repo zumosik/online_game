@@ -2,6 +2,7 @@ package tcpclient
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net"
 	"online_game/internal/packets"
@@ -13,6 +14,8 @@ type User struct {
 	Username string
 	Pin      uint32
 }
+
+const maxReadSize = 1024
 
 // TCPClient struct represents a client that can send and receive packets over a TCP connection.
 type TCPClient struct {
@@ -37,7 +40,6 @@ func (c *TCPClient) Send(p packets.Packet) error {
 		log.Printf("Error serializing packet: %v", err)
 		return err
 	}
-	log.Printf("Sending packet: %v", data)
 
 	n, err := c.conn.Write(data)
 	if err != nil {
@@ -52,7 +54,7 @@ func (c *TCPClient) Send(p packets.Packet) error {
 // Receive method reads a packets.Packet from the TCP connection.
 // ErrNoDataRead is returned if no data was read. This is not an error.
 func (c *TCPClient) Receive() (packets.Packet, error) {
-	var data []byte
+	data := make([]byte, 1024)
 	n, err := c.conn.Read(data)
 	if err != nil {
 		return packets.Packet{}, err
@@ -60,7 +62,11 @@ func (c *TCPClient) Receive() (packets.Packet, error) {
 
 	if n == 0 {
 		return packets.Packet{}, ErrNoDataRead
+	} else {
+		log.Printf("Received data: %v", fmt.Sprintf("%v", data[:n]))
 	}
+
+	log.Printf("Successfully recieved %d bytes", n)
 
 	return packets.DeserializePacket(data[:n])
 }

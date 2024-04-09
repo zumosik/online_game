@@ -68,7 +68,6 @@ func (g *Game) Start() {
 	player.AddComponent(&components.RigidbodyComponent{Velocity: rl.NewVector2(0, 0), Speed: 5})
 	player.AddComponent(&components.PlayerKeyboardComponent{TypeOfInput: components.WASDInput})
 
-	log.Println("sending ConnectReq...")
 	err := g.cl.Send(packets.Packet{
 		TypeOfPacket: packets.TypeOfPacketConnectReq,
 		Payload: packets.ConnectReq{
@@ -79,7 +78,6 @@ func (g *Game) Start() {
 	if err != nil {
 		return // cant go further if we cant send server about new player
 	}
-	log.Println("ConnectReq sent")
 
 	go g.TCPLoopRead()
 
