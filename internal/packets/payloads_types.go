@@ -7,7 +7,6 @@ const (
 	TypeOfPacketConnectReq              // to connect
 	TypeOfPacketConnectResp             // connect resp
 	TypeOfPacketNewPlayerConnect        // notify other players about new conn
-	TypeOfPacketDisconnectReq           // safe disconnect
 	TypeOfPacketPlayerPosReq            // send your pos
 )
 
@@ -19,6 +18,7 @@ type Payload interface {
 type ConnectReq struct {
 	Username string
 	Pin      uint32 // like password
+	// TODO return info about all connected players
 }
 
 type ConnectResp struct {
@@ -34,9 +34,7 @@ type PlayerPosReq struct {
 }
 
 type NewPlayerConnect struct {
-	models.Player
-}
-
-type DisconnectReq struct {
-	ID uint16
+	Username string
+	UserID   uint16
+	X, Y     float32
 }

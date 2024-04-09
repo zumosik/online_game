@@ -102,6 +102,8 @@ func (g *Game) TCPLoopRead() {
 		case packets.TypeOfPacketConnectResp:
 			resp := p.Payload.(packets.ConnectResp)
 			g.connected = resp.OK
+		case packets.TypeOfPacketNewPlayerConnect:
+			log.Println("new player connect")
 		default:
 			continue
 		}

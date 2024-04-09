@@ -7,11 +7,12 @@ import (
 	"online_game/internal/lib/logger/sl"
 	"online_game/internal/models"
 	"online_game/internal/packets"
+	"strconv"
 	"time"
 )
 
 func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets.ConnectResp {
-	s.l.Debug("Handling ConnectReq", sl.Attr("username", req.Username), sl.Attr("pin", string(req.Pin)))
+	s.l.Debug("Handling ConnectReq", sl.Attr("username", req.Username), sl.Attr("pin", strconv.Itoa(int(req.Pin))))
 
 	time.Sleep(2 * time.Second) // Simulate slow connection
 
@@ -52,9 +53,9 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 
 	for cl := range s.playerMap { // sending to other clients
 		s.l.Debug("Sending NewPlayerConnect packet", sl.Attr("player addr", cl.RemoteAddr().String()))
-		var req packets.NewPlayerConnect
-		req.Player = pl
-		err := s.SendToClient(cl, &req)
+		req := packets.NewPlayerConnect{Username: pl.Username, UserID: pl.UserID, X: float32(pl.Pos.X), Y: float32(pl.Pos.Y)}
+
+		err := s.SendToClient(cl, req, packets.TypeOfPacketNewPlayerConnect)
 		if err != nil {
 			s.l.Error("Cant send to client about new conn", sl.Err(err), sl.Attr("client who wanted to recieve", cl.RemoteAddr().String()))
 		}
@@ -79,10 +80,6 @@ func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
 
 	player.Pos = req.Vector
 	s.playerMap[conn] = player
-}
-
-func (s *Server) handleDisconnect(req packets.DisconnectReq, conn net.Conn) {
-	s.connClose(conn)
 }
 
 func (s *Server) isUserIDUnique(userID uint16) bool {

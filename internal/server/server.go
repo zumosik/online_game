@@ -185,7 +185,7 @@ func (s *Server) msgLoop() {
 		case packets.TypeOfPacketConnectReq:
 			req := msg.packet.Payload.(packets.ConnectReq)
 			resp := s.handleConnectReq(req, msg.from)
-			err := s.SendToClient(msg.from, resp)
+			err := s.SendToClient(msg.from, resp, packets.TypeOfPacketConnectResp)
 			if err != nil {
 				s.l.Error("cant send to client", sl.Err(err))
 				continue
@@ -193,27 +193,13 @@ func (s *Server) msgLoop() {
 		case packets.TypeOfPacketPlayerPosReq:
 			req := msg.packet.Payload.(packets.PlayerPosReq)
 			s.handlePlayerPosReq(req, msg.from)
-		case packets.TypeOfPacketDisconnectReq:
-			req := msg.packet.Payload.(packets.DisconnectReq)
-			s.handleDisconnect(req, msg.from)
 		default:
 			// idk
 		}
 	}
 }
 
-func (s *Server) SendToClient(conn net.Conn, payload interface{}) error {
-	var typeOfPacket uint8
-
-	switch payload.(type) {
-	case packets.ConnectResp:
-		typeOfPacket = packets.TypeOfPacketConnectResp
-	case packets.NewPlayerConnect:
-		typeOfPacket = packets.TypeOfPacketNewPlayerConnect
-	default:
-		return ErrInvalidType
-	}
-
+func (s *Server) SendToClient(conn net.Conn, payload interface{}, typeOfPacket byte) error {
 	packet := packets.Packet{
 		TypeOfPacket: typeOfPacket,
 		Payload:      payload,
