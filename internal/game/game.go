@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	player *cm.GameObject
+	player  *cm.GameObject
+	players []*cm.GameObject
 )
 
 type Game struct {
@@ -109,10 +110,42 @@ func (g *Game) TCPLoopRead() {
 			}
 
 			log.Printf("Connected to server, other players: %v", resp.Players)
+			for _, p := range resp.Players {
+				newPlayer := g.manager.CreateGameObject()
+				newPlayer.AddComponent(&components.TransformComponent{
+					Pos:   rl.NewVector2(500, 200), // TODO: set this to resp.Player.Pos
+					Size:  rl.NewVector2(48, 48),
+					Scale: rl.NewVector2(3, 3), // TODO: change this
+				})
+				newPlayer.AddComponent(&components.PlayerInfoComponent{Info: p})
+				newPlayer.AddComponent(&components.SpriteComponent{
+					Tex:   g.tex.Player,
+					Color: rl.White,
+				})
+
+				players = append(players, newPlayer)
+			}
+
+			log.Printf("\nPlayers: %v\n", players)
 
 		case packets.TypeOfPacketNewPlayerConnect:
 			resp := p.Payload.(packets.NewPlayerConnect)
 			log.Printf("new player connect: %v", resp.Player)
+			newPlayer := g.manager.CreateGameObject()
+			newPlayer.AddComponent(&components.TransformComponent{
+				Pos:   rl.NewVector2(500, 200), // TODO: set this to resp.Player.Pos
+				Size:  rl.NewVector2(48, 48),
+				Scale: rl.NewVector2(3, 3), // TODO: change this
+			})
+			newPlayer.AddComponent(&components.PlayerInfoComponent{Info: resp.Player})
+			newPlayer.AddComponent(&components.SpriteComponent{
+				Tex:   g.tex.Player,
+				Color: rl.White,
+			})
+
+			players = append(players, newPlayer)
+
+			log.Printf("\nPlayers: %v\n", players)
 		default:
 			continue
 		}
