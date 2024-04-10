@@ -53,7 +53,13 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 
 	for cl := range s.playerMap { // sending to other clients
 		s.l.Debug("Sending NewPlayerConnect packet", sl.Attr("player addr", cl.RemoteAddr().String()))
-		req := packets.NewPlayerConnect{Username: pl.Username, UserID: pl.UserID, X: float32(pl.Pos.X), Y: float32(pl.Pos.Y)}
+		req := packets.NewPlayerConnect{
+			Player: models.PublicPlayer{
+				Username: pl.Username,
+				UserID:   pl.UserID,
+				Pos:      pl.Pos,
+			},
+		}
 
 		err := s.SendToClient(cl, req, packets.TypeOfPacketNewPlayerConnect)
 		if err != nil {
@@ -65,8 +71,30 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(pl.UserID)))
 
+	// Send to the new player info about all connected players
+	var players []models.PublicPlayer
+	var i int
+	for _, player := range s.playerMap {
+		if i > 10 {
+			break
+		}
+
+		players = append(players, models.PublicPlayer{
+			Username: player.Username,
+			UserID:   player.UserID,
+			Pos:      player.Pos,
+		})
+
+		i++
+	}
+
 	return packets.ConnectResp{OK: true, AlreadyExists: playerExists,
-		Username: pl.Username, UserID: pl.UserID,
+		Player: models.PublicPlayer{
+			Username: pl.Username,
+			UserID:   pl.UserID,
+			Pos:      pl.Pos,
+		},
+		Players: players,
 	}
 
 }

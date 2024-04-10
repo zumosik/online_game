@@ -7,6 +7,14 @@ type Player struct {
 	Pin      uint32
 }
 
+// PublicPlayer is a player that is visible to other players (doesnt have Pin field)
+type PublicPlayer struct {
+	Username string
+	UserID   uint16
+	Pos      Vector
+	Pin      uint32
+}
+
 type Vector struct {
 	X float64
 	Y float64

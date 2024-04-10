@@ -101,9 +101,18 @@ func (g *Game) TCPLoopRead() {
 		switch p.TypeOfPacket {
 		case packets.TypeOfPacketConnectResp:
 			resp := p.Payload.(packets.ConnectResp)
-			g.connected = resp.OK
+			if resp.OK {
+				g.connected = true
+			} else {
+				// we will not go further if we cant connect to server
+				panic("Cant connect to server") // TODO: handle this
+			}
+
+			log.Printf("Connected to server, other players: %v", resp.Players)
+
 		case packets.TypeOfPacketNewPlayerConnect:
-			log.Println("new player connect")
+			resp := p.Payload.(packets.NewPlayerConnect)
+			log.Printf("new player connect: %v", resp.Player)
 		default:
 			continue
 		}

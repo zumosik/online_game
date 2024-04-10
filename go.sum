@@ -24,6 +24,8 @@ github.com/zumosik/bb-marshaling v0.0.0-20240407155638-d8d74da42c27 h1:mhVPopP9p
 github.com/zumosik/bb-marshaling v0.0.0-20240407155638-d8d74da42c27/go.mod h1:j+86oi1nvWF2MA4+BVyuAgen3lsM+BcwFdIkTrhMQ3o=
 github.com/zumosik/bb-marshaling v0.0.0-20240408191242-a30204e45d20 h1:Evt6R8V0cHzUGZhCaPbsGa/QaOro+whgbjKtbkWINuw=
 github.com/zumosik/bb-marshaling v0.0.0-20240408191242-a30204e45d20/go.mod h1:j+86oi1nvWF2MA4+BVyuAgen3lsM+BcwFdIkTrhMQ3o=
+github.com/zumosik/bb-marshaling v0.0.0-20240410054116-97ab68374bd4 h1:JQt+H2UENA8APdO5tNEAZp3aq9I2mm4/uOqnSocsMMI=
+github.com/zumosik/bb-marshaling v0.0.0-20240410054116-97ab68374bd4/go.mod h1:j+86oi1nvWF2MA4+BVyuAgen3lsM+BcwFdIkTrhMQ3o=
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.14.0 h1:Vz7Qs629MkJkGyHxUlRHizWJRG2j8fbQKjELVSNhy7Q=

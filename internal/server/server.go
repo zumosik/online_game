@@ -38,6 +38,7 @@ type Server struct {
 	l          *slog.Logger
 
 	maxReadSize uint32
+	maxPlayer   uint8
 
 	quitCh chan struct{}
 	msgCh  chan Message
@@ -70,6 +71,7 @@ func New(cfg *Config) *Server {
 		l:          cfg.Logger,
 
 		maxReadSize: cfg.MaxReadSize,
+		maxPlayer:   10,
 
 		quitCh: make(chan struct{}),
 		msgCh:  make(chan Message, 10),
