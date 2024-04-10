@@ -158,11 +158,7 @@ func (s *Server) readLoop(conn net.Conn) {
 		// check if something was read
 		if n == 0 {
 			continue
-		} else {
-			s.l.Debug("read", sl.Attr("bytes", fmt.Sprint(n)))
 		}
-
-		s.l.Debug("received data", sl.Attr("data", fmt.Sprintf("%v", buf[:n])))
 
 		packet, err := packets.DeserializePacket(buf)
 		if err != nil {

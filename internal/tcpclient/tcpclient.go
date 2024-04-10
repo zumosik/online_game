@@ -2,7 +2,6 @@ package tcpclient
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"online_game/internal/packets"
@@ -41,12 +40,11 @@ func (c *TCPClient) Send(p packets.Packet) error {
 		return err
 	}
 
-	n, err := c.conn.Write(data)
+	_, err = c.conn.Write(data)
 	if err != nil {
 		log.Printf("Error sending packet: %v", err)
 		return err
 	}
-	log.Printf("Successfully sent %d bytes", n)
 
 	return nil
 }
@@ -62,11 +60,7 @@ func (c *TCPClient) Receive() (packets.Packet, error) {
 
 	if n == 0 {
 		return packets.Packet{}, ErrNoDataRead
-	} else {
-		log.Printf("Received data: %v", fmt.Sprintf("%v", data[:n]))
 	}
-
-	log.Printf("Successfully recieved %d bytes", n)
 
 	return packets.DeserializePacket(data[:n])
 }

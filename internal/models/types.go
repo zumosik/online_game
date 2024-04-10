@@ -5,6 +5,7 @@ type Player struct {
 	UserID   uint16
 	Pos      Vector
 	Pin      uint32
+	Token    string `gob:"-"` // token is generated each time player connects, we dont need to save it
 }
 
 // PublicPlayer is a player that is visible to other players (doesnt have Pin field)
@@ -16,11 +17,11 @@ type PublicPlayer struct {
 }
 
 type Vector struct {
-	X float64
-	Y float64
+	X float32
+	Y float32
 }
 
-func (v Vector) Multiply(multiplier float64) {
+func (v Vector) Multiply(multiplier float32) {
 	v.X *= multiplier
 	v.Y *= multiplier
 }

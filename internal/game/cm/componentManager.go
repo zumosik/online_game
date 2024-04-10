@@ -84,7 +84,6 @@ func (o *GameObject) Update() {
 }
 
 func (o *GameObject) Render() {
-	log.Println("render object", o.id)
 	for _, c := range o.components {
 		c.Render()
 	}

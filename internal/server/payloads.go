@@ -1,20 +1,19 @@
 package server
 
 import (
+	"fmt"
 	"log/slog"
 	"math/rand"
 	"net"
 	"online_game/internal/lib/logger/sl"
+	"online_game/internal/lib/utils"
 	"online_game/internal/models"
 	"online_game/internal/packets"
 	"strconv"
-	"time"
 )
 
 func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets.ConnectResp {
 	s.l.Debug("Handling ConnectReq", sl.Attr("username", req.Username), sl.Attr("pin", strconv.Itoa(int(req.Pin))))
-
-	time.Sleep(2 * time.Second) // Simulate slow connection
 
 	_, exists := s.playerMap[conn]
 	if exists { // already connected
@@ -67,16 +66,24 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 		}
 	}
 
+	// Token for future requests
+	token := utils.GenerateToken()
+	pl.Token = token
+
 	s.playerMap[conn] = pl
 
 	s.l.Debug("New player registered", slog.String("username", req.Username), slog.Int("id", int(pl.UserID)))
 
 	// Send to the new player info about all connected players
 	var players []models.PublicPlayer
-	var i int
+	var i uint8
 	for _, player := range s.playerMap {
-		if i > 10 {
+		if i > s.maxPlayer {
 			break
+		}
+
+		if player.UserID == pl.UserID {
+			continue
 		}
 
 		players = append(players, models.PublicPlayer{
@@ -95,6 +102,7 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 			Pos:      pl.Pos,
 		},
 		Players: players,
+		Token:   token,
 	}
 
 }
@@ -105,6 +113,13 @@ func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
 	if !exists && player.UserID != req.ID {
 		return
 	}
+
+	if player.Token != req.Token {
+		return
+	}
+
+	s.l.Debug("Got pos", sl.Attr("x", fmt.Sprintf("%f", req.Vector.X)),
+		sl.Attr("y", fmt.Sprintf("%f", req.Vector.Y)))
 
 	player.Pos = req.Vector
 	s.playerMap[conn] = player

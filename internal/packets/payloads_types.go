@@ -8,6 +8,7 @@ const (
 	TypeOfPacketConnectResp             // connect resp
 	TypeOfPacketNewPlayerConnect        // notify other players about new conn
 	TypeOfPacketPlayerPosReq            // send your pos
+	TypeOfPacketPlayerPosResp           // send other player pos
 )
 
 type Payload interface {
@@ -18,21 +19,27 @@ type Payload interface {
 type ConnectReq struct {
 	Username string
 	Pin      uint32 // like password
-	// TODO return info about all connected players
 }
 
 type ConnectResp struct {
 	OK            bool
 	AlreadyExists bool                // if player already was in save
 	Player        models.PublicPlayer // return the player its info
+	Token         string              // token for future requests
 	Players       []models.PublicPlayer
 }
 
 type PlayerPosReq struct {
+	Token string
+
 	ID     uint16
 	Vector models.Vector
 }
 
 type NewPlayerConnect struct {
 	Player models.PublicPlayer
+}
+
+type PlayerPosResp struct {
+	Player models.PublicPlayer // TODO
 }

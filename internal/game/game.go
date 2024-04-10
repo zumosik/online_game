@@ -6,6 +6,7 @@ import (
 	"online_game/internal/game/cm"
 	"online_game/internal/game/cm/components"
 	"online_game/internal/game/textures"
+	"online_game/internal/models"
 	"online_game/internal/packets"
 	"online_game/internal/tcpclient"
 
@@ -111,39 +112,23 @@ func (g *Game) TCPLoopRead() {
 
 			log.Printf("Connected to server, other players: %v", resp.Players)
 			for _, p := range resp.Players {
-				newPlayer := g.manager.CreateGameObject()
-				newPlayer.AddComponent(&components.TransformComponent{
-					Pos:   rl.NewVector2(500, 200), // TODO: set this to resp.Player.Pos
-					Size:  rl.NewVector2(48, 48),
-					Scale: rl.NewVector2(3, 3), // TODO: change this
-				})
-				newPlayer.AddComponent(&components.PlayerInfoComponent{Info: p})
-				newPlayer.AddComponent(&components.SpriteComponent{
-					Tex:   g.tex.Player,
-					Color: rl.White,
-				})
-
-				players = append(players, newPlayer)
+				g.createNewPlayer(p)
 			}
+
+			// set player info
+			player.AddComponent(&components.PlayerInfoComponent{
+				Info:   resp.Player,
+				Client: g.cl,
+				Token:  resp.Token,
+			})
 
 			log.Printf("\nPlayers: %v\n", players)
 
 		case packets.TypeOfPacketNewPlayerConnect:
 			resp := p.Payload.(packets.NewPlayerConnect)
 			log.Printf("new player connect: %v", resp.Player)
-			newPlayer := g.manager.CreateGameObject()
-			newPlayer.AddComponent(&components.TransformComponent{
-				Pos:   rl.NewVector2(500, 200), // TODO: set this to resp.Player.Pos
-				Size:  rl.NewVector2(48, 48),
-				Scale: rl.NewVector2(3, 3), // TODO: change this
-			})
-			newPlayer.AddComponent(&components.PlayerInfoComponent{Info: resp.Player})
-			newPlayer.AddComponent(&components.SpriteComponent{
-				Tex:   g.tex.Player,
-				Color: rl.White,
-			})
 
-			players = append(players, newPlayer)
+			g.createNewPlayer(resp.Player)
 
 			log.Printf("\nPlayers: %v\n", players)
 		default:
@@ -188,4 +173,20 @@ func (g *Game) drawScene() {
 
 func (g *Game) drawWaitingMenu() {
 	rl.DrawText("Waiting for connection...", 10, 10, 20, rl.Black)
+}
+
+func (g *Game) createNewPlayer(pl models.PublicPlayer) {
+	newPlayer := g.manager.CreateGameObject()
+	newPlayer.AddComponent(&components.TransformComponent{
+		Pos:   rl.NewVector2(500, 200), // TODO: set this to resp.Player.Pos
+		Size:  rl.NewVector2(48, 48),
+		Scale: rl.NewVector2(3, 3), // TODO: change this
+	})
+	newPlayer.AddComponent(&components.OtherPlayerInfoComponent{Info: pl})
+	newPlayer.AddComponent(&components.SpriteComponent{
+		Tex:   g.tex.Player, // TODO: change this to other player texture
+		Color: rl.Gray,      // TODO: change this to white
+	})
+
+	players = append(players, newPlayer)
 }

@@ -21,8 +21,8 @@ func SerializePacket(p Packet) ([]byte, error) {
 	// Serialize payload.
 	data := make([]byte, 0)
 	var err error
-	// To Marshall we need to get struct type (doesnt work with interface{}).
 
+	// To Marshall, we need to get struct type (doesnt work with interface{}).
 	switch p.TypeOfPacket {
 	case TypeOfPacketConnectReq:
 		v := p.Payload.(ConnectReq)
