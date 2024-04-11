@@ -5,6 +5,13 @@ import (
 	"reflect"
 )
 
+type Layer string
+
+const (
+	LayerPlayer      Layer = "player"
+	LayerOtherPlayer Layer = "otherPlayer"
+)
+
 type Manager struct {
 	objects []*GameObject
 	lastId  uint16
@@ -27,7 +34,6 @@ func (m *Manager) CreateGameObject() *GameObject {
 
 	// to not get errors
 	o.components = make([]Component, 0)
-	o.layers = make([]string, 0)
 
 	return o
 }
@@ -39,14 +45,22 @@ func (m *Manager) Update() {
 }
 
 func (m *Manager) Render() {
-	for _, o := range m.objects {
-		o.Render()
+	// render objects in order of layers
+	for _, layer := range []Layer{
+		LayerPlayer,
+		LayerOtherPlayer, // here need to be all layers in order we want to render them
+	} {
+		for _, o := range m.objects {
+			if o.Layer == layer {
+				o.Render()
+			}
+		}
 	}
 }
 
 type GameObject struct {
-	id     uint16
-	layers []string // TODO
+	id    uint16
+	Layer Layer // public field to set layer
 
 	components []Component
 }

@@ -107,7 +107,7 @@ func (g *Game) TCPLoopRead() {
 				g.connected = true
 			} else {
 				// we will not go further if we cant connect to server
-				panic("Cant connect to server") // TODO: handle this
+				log.Fatal("Cant connect to server")
 			}
 
 			log.Printf("Connected to server, other players: %v", resp.Players)

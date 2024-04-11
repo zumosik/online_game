@@ -48,7 +48,7 @@ func (t *PlayerInfoComponent) Update() {
 		},
 	)
 	if err != nil {
-		return // TODO handle error
+		return
 	}
 
 }

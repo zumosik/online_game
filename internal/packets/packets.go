@@ -39,7 +39,7 @@ func SerializePacket(p Packet) ([]byte, error) {
 	case TypeOfPacketPlayerPosResp:
 		v := p.Payload.(PlayerPosResp)
 		data, err = bb.Marshall(v)
-	// TODO add more cases here.
+	// add more cases here.
 	default:
 		return []byte{}, ErrInvalidPacketType
 	}
@@ -80,7 +80,7 @@ func DeserializePacket(data []byte) (Packet, error) {
 		var v PlayerPosResp
 		err = bb.Unmarshall(data[1:], &v)
 		p.Payload = v
-	// TODO add more cases here.
+	// add more cases here.
 	default:
 		return Packet{}, ErrInvalidPacketType
 	}
