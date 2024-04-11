@@ -60,8 +60,8 @@ func (g *Game) Start() {
 	player = g.manager.CreateGameObject()
 	player.AddComponent(&components.TransformComponent{
 		Pos:   rl.NewVector2(500, 200),
-		Size:  rl.NewVector2(48, 48),
-		Scale: rl.NewVector2(5, 5),
+		Size:  rl.NewVector2(16, 16),
+		Scale: rl.NewVector2(3, 3),
 	})
 	player.AddComponent(&components.SpriteComponent{
 		Tex:   g.tex.Player,
@@ -185,14 +185,14 @@ func (g *Game) drawWaitingMenu() {
 func (g *Game) createNewPlayer(pl models.PublicPlayer) {
 	newPlayer := g.manager.CreateGameObject()
 	newPlayer.AddComponent(&components.TransformComponent{
-		Pos:   rl.NewVector2(500, 200), // TODO: set this to resp.Player.Pos
-		Size:  rl.NewVector2(48, 48),
-		Scale: rl.NewVector2(3, 3), // TODO: change this
+		Pos:   rl.NewVector2(pl.Pos.X, pl.Pos.Y),
+		Size:  rl.NewVector2(16, 16),
+		Scale: rl.NewVector2(3, 3),
 	})
 	newPlayer.AddComponent(&components.OtherPlayerInfoComponent{Info: pl})
 	newPlayer.AddComponent(&components.SpriteComponent{
-		Tex:   g.tex.Player, // TODO: change this to other player texture
-		Color: rl.Gray,      // TODO: change this to white
+		Tex:   g.tex.OtherPlayer,
+		Color: rl.White,
 	})
 
 	players = append(players, newPlayer)

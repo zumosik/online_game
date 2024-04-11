@@ -41,5 +41,5 @@ type NewPlayerConnect struct {
 }
 
 type PlayerPosResp struct {
-	Player models.PublicPlayer // TODO
+	Player models.PublicPlayer
 }

@@ -26,11 +26,16 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 	}
 
 	// Player is not connected:
-
 	var pl models.Player
 	pl, playerExists := s.save.Players[req.Username]
-	if !playerExists { // create new player
-		pl.Pos = models.Vector{X: 1, Y: 1}
+	if !playerExists {
+		// create new player
+
+		// create coords random from 300 to 700
+		pl.Pos = models.Vector{
+			X: float32(rand.Intn(400) + 300),
+			Y: float32(rand.Intn(400) + 300),
+		}
 		pl.Username = req.Username
 		pl.Pin = req.Pin
 
@@ -116,9 +121,8 @@ func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
 		return
 	}
 
-	// Senfing pos to other players
+	// Sending pos to other players
 	for cl := range s.playerMap {
-		s.l.Debug("Sending PlayerPosResp packet", sl.Attr("player addr", cl.RemoteAddr().String()))
 		if cl == conn {
 			continue
 		}
@@ -132,7 +136,7 @@ func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
 		}, packets.TypeOfPacketPlayerPosResp)
 
 		if err != nil {
-			s.l.Error("Cant send to client about new pos", sl.Err(err), sl.Attr("client who wanted to recieve", cl.RemoteAddr().String()))
+			s.l.Error("Cant send to client about new pos", sl.Err(err), sl.Attr("client who wanted to receive", cl.RemoteAddr().String()))
 		}
 	}
 

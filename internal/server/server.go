@@ -197,6 +197,7 @@ func (s *Server) msgLoop() {
 	}
 }
 
+// SendToClient sends a packet created from payload and typeOfPacket to a client.
 func (s *Server) SendToClient(conn net.Conn, payload interface{}, typeOfPacket byte) error {
 	packet := packets.Packet{
 		TypeOfPacket: typeOfPacket,
@@ -209,8 +210,6 @@ func (s *Server) SendToClient(conn net.Conn, payload interface{}, typeOfPacket b
 	}
 
 	_, err = conn.Write(data)
-
-	s.l.Debug("sent data", sl.Attr("data", fmt.Sprintf("%v", data)))
 
 	return err
 }

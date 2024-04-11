@@ -61,7 +61,6 @@ func (o *GameObject) AddComponent(component Component) {
 func (o *GameObject) GetComponent(componentType Component) Component {
 	for _, c := range o.components {
 		if reflect.TypeOf(c) == reflect.TypeOf(componentType) {
-			log.Printf("get component: %v", c)
 			return c
 		}
 	}
