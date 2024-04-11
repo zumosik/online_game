@@ -39,6 +39,9 @@ func SerializePacket(p Packet) ([]byte, error) {
 	case TypeOfPacketPlayerPosResp:
 		v := p.Payload.(PlayerPosResp)
 		data, err = bb.Marshall(v)
+	case TypeOfPacketPlayerDisconnect:
+		v := p.Payload.(PlayerDisconnect)
+		data, err = bb.Marshall(v)
 	// add more cases here.
 	default:
 		return []byte{}, ErrInvalidPacketType
@@ -78,6 +81,10 @@ func DeserializePacket(data []byte) (Packet, error) {
 		p.Payload = v
 	case TypeOfPacketPlayerPosResp:
 		var v PlayerPosResp
+		err = bb.Unmarshall(data[1:], &v)
+		p.Payload = v
+	case TypeOfPacketPlayerDisconnect:
+		var v PlayerDisconnect
 		err = bb.Unmarshall(data[1:], &v)
 		p.Payload = v
 	// add more cases here.

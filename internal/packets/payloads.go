@@ -9,6 +9,7 @@ const (
 	TypeOfPacketNewPlayerConnect        // notify other players about new conn
 	TypeOfPacketPlayerPosReq            // send your pos
 	TypeOfPacketPlayerPosResp           // send other player pos
+	TypeOfPacketPlayerDisconnect        // other player disconnected
 )
 
 type Payload interface {
@@ -41,5 +42,9 @@ type NewPlayerConnect struct {
 }
 
 type PlayerPosResp struct {
+	Player models.PublicPlayer
+}
+
+type PlayerDisconnect struct {
 	Player models.PublicPlayer
 }

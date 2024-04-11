@@ -15,10 +15,6 @@ import (
 	"syscall"
 )
 
-var (
-	ErrInvalidType = errors.New("invalid type of packet")
-)
-
 type Message struct {
 	from   net.Conn
 	packet packets.Packet
@@ -223,6 +219,25 @@ func (s *Server) connClose(conn net.Conn) {
 	s.save.Players[pl.Username] = pl
 	s.l.Debug("Saved player", sl.Attr("username", pl.Username), sl.Attr("id", fmt.Sprint(pl.UserID)))
 	delete(s.playerMap, conn) // deleting player from map
+
+	// send to all players that player disconnected
+	req := packets.PlayerDisconnect{
+		Player: models.PublicPlayer{
+			Username: pl.Username,
+			UserID:   pl.UserID,
+			Pos:      pl.Pos,
+		},
+	}
+
+	for c := range s.playerMap {
+		if c == conn {
+			continue // skip the player who disconnected
+		}
+		err := s.SendToClient(c, req, packets.TypeOfPacketPlayerDisconnect)
+		if err != nil {
+			s.l.Error("cant send to client about player disconnect", sl.Err(err))
+		}
+	}
 
 	err := conn.Close()
 	if err != nil {

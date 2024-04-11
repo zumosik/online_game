@@ -69,6 +69,7 @@ func (g *Game) Start() {
 	})
 	player.AddComponent(&components.RigidbodyComponent{Velocity: rl.NewVector2(0, 0), Speed: 5})
 	player.AddComponent(&components.PlayerKeyboardComponent{TypeOfInput: components.WASDInput})
+	player.Layer = cm.LayerPlayer
 
 	err := g.cl.Send(packets.Packet{
 		TypeOfPacket: packets.TypeOfPacketConnectReq,
@@ -122,6 +123,9 @@ func (g *Game) TCPLoopRead() {
 				Token:  resp.Token,
 			})
 
+			player.GetComponent(&components.TransformComponent{}).(*components.TransformComponent).Pos =
+				rl.NewVector2(resp.Player.Pos.X, resp.Player.Pos.Y) // set player position
+
 			log.Printf("\nPlayers: %v\n", players)
 
 		case packets.TypeOfPacketNewPlayerConnect:
@@ -137,6 +141,20 @@ func (g *Game) TCPLoopRead() {
 				transform := pl.GetComponent(&components.TransformComponent{}).(*components.TransformComponent)
 				transform.Pos =
 					rl.NewVector2(resp.Player.Pos.X, resp.Player.Pos.Y)
+			}
+		case packets.TypeOfPacketPlayerDisconnect:
+			log.Printf("Player disconnected: %v", p.Payload.(packets.PlayerDisconnect).Player)
+			// delete player from players
+			resp := p.Payload.(packets.PlayerDisconnect)
+			for i, pl := range players {
+				info := pl.GetComponent(&components.OtherPlayerInfoComponent{}).(*components.OtherPlayerInfoComponent)
+				if info.Info.UserID == resp.Player.UserID {
+					players = append(players[:i], players[i+1:]...) // deleting player from players
+
+					g.manager.DeleteGameObjectByID(pl.ID)
+
+					break
+				}
 			}
 		default:
 			continue
@@ -194,6 +212,7 @@ func (g *Game) createNewPlayer(pl models.PublicPlayer) {
 		Tex:   g.tex.OtherPlayer,
 		Color: rl.White,
 	})
+	newPlayer.Layer = cm.LayerOtherPlayer
 
 	players = append(players, newPlayer)
 }
