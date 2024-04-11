@@ -131,6 +131,13 @@ func (g *Game) TCPLoopRead() {
 			g.createNewPlayer(resp.Player)
 
 			log.Printf("\nPlayers: %v\n", players)
+		case packets.TypeOfPacketPlayerPosResp:
+			resp := p.Payload.(packets.PlayerPosResp)
+			for _, pl := range players {
+				transform := pl.GetComponent(&components.TransformComponent{}).(*components.TransformComponent)
+				transform.Pos =
+					rl.NewVector2(resp.Player.Pos.X, resp.Player.Pos.Y)
+			}
 		default:
 			continue
 		}

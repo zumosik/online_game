@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log/slog"
 	"math/rand"
 	"net"
@@ -108,7 +107,6 @@ func (s *Server) handleConnectReq(req packets.ConnectReq, conn net.Conn) packets
 }
 
 func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
-
 	player, exists := s.playerMap[conn]
 	if !exists && player.UserID != req.ID {
 		return
@@ -118,8 +116,25 @@ func (s *Server) handlePlayerPosReq(req packets.PlayerPosReq, conn net.Conn) {
 		return
 	}
 
-	s.l.Debug("Got pos", sl.Attr("x", fmt.Sprintf("%f", req.Vector.X)),
-		sl.Attr("y", fmt.Sprintf("%f", req.Vector.Y)))
+	// Senfing pos to other players
+	for cl := range s.playerMap {
+		s.l.Debug("Sending PlayerPosResp packet", sl.Attr("player addr", cl.RemoteAddr().String()))
+		if cl == conn {
+			continue
+		}
+
+		err := s.SendToClient(cl, packets.PlayerPosResp{
+			Player: models.PublicPlayer{
+				Username: player.Username,
+				UserID:   player.UserID,
+				Pos:      req.Vector,
+			},
+		}, packets.TypeOfPacketPlayerPosResp)
+
+		if err != nil {
+			s.l.Error("Cant send to client about new pos", sl.Err(err), sl.Attr("client who wanted to recieve", cl.RemoteAddr().String()))
+		}
+	}
 
 	player.Pos = req.Vector
 	s.playerMap[conn] = player

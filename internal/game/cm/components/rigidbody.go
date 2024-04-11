@@ -1,8 +1,9 @@
 package components
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
 	"online_game/internal/game/cm"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 // RigidbodyComponent stores value about velocity and speed.
