@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
-	"online_game/internal/server"
+	"online_game/internal/packets"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,9 +33,9 @@ func main() {
 		<-sigCh
 		fmt.Println("\nCtrl+C pressed. Closing connection...")
 
-		req := server.DisconnectReq{ID: id}
-		packet := server.Packet{
-			TypeOfPacket: server.TypeOfPacketDisconnectReq,
+		req := packets.DisconnectReq{ID: id}
+		packet := packets.Packet{
+			TypeOfPacket: packets.TypeOfPacketDisconnectReq,
 			Payload:      &req,
 		}
 
@@ -60,9 +60,9 @@ func main() {
 		os.Exit(0)
 	}()
 
-	req := server.ConnectReq{Username: "user1", Pin: 1488}
-	packet := server.Packet{
-		TypeOfPacket: server.TypeOfPacketConnectReq,
+	req := packets.ConnectReq{Username: "user1", Pin: 1488}
+	packet := packets.Packet{
+		TypeOfPacket: packets.TypeOfPacketConnectReq,
 		Payload:      &req,
 	}
 
@@ -88,13 +88,13 @@ func main() {
 		return
 	}
 
-	packet, err = server.Deserialize(buffer[:n])
+	packet, err = packets.Deserialize(buffer[:n])
 	if err != nil {
 		fmt.Println("Error deserializing packet:", err)
 		return
 	}
 
-	connResp := packet.Payload.(*server.ConnectResp)
+	connResp := packet.Payload.(*packets.ConnectResp)
 
 	if !connResp.OK {
 		fmt.Println("!connResp.OK")
@@ -111,9 +111,9 @@ func main() {
 		vec.X += (1.0 / 3.0)
 		vec.Y += (1.0 / 9.0)
 
-		req := server.PlayerPosReq{ID: id, Vector: vec}
-		packet = server.Packet{
-			TypeOfPacket: server.TypeOfPacketPlayerPosReq,
+		req := packets.PlayerPosReq{ID: id, Vector: vec}
+		packet = packets.Packet{
+			TypeOfPacket: packets.TypeOfPacketPlayerPosReq,
 			Payload:      &req,
 		}
 

@@ -1,8 +1,9 @@
 package components
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
 	"online_game/internal/game/cm"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 // SpriteComponent stores value about pointer to texture and color.

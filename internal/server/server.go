@@ -8,19 +8,16 @@ import (
 	"net"
 	"online_game/internal/lib/logger/sl"
 	"online_game/internal/models"
+	"online_game/internal/packets"
 	"online_game/internal/saver"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-var (
-	ErrInvalidType = errors.New("invalid type of packet")
-)
-
 type Message struct {
 	from   net.Conn
-	packet Packet
+	packet packets.Packet
 }
 
 type Config struct {
@@ -37,6 +34,7 @@ type Server struct {
 	l          *slog.Logger
 
 	maxReadSize uint32
+	maxPlayer   uint8
 
 	quitCh chan struct{}
 	msgCh  chan Message
@@ -69,6 +67,7 @@ func New(cfg *Config) *Server {
 		l:          cfg.Logger,
 
 		maxReadSize: cfg.MaxReadSize,
+		maxPlayer:   10,
 
 		quitCh: make(chan struct{}),
 		msgCh:  make(chan Message, 10),
@@ -139,15 +138,28 @@ func (s *Server) acceptLoop() {
 
 func (s *Server) readLoop(conn net.Conn) {
 	defer s.connClose(conn)
+	buf := make([]byte, s.maxReadSize)
 
 	for {
-		packet, err := Deserialize(conn)
+		n, err := conn.Read(buf)
+
 		if err != nil {
 			if errors.Is(err, io.EOF) { // closed conn
 				s.l.Debug("conn closed", sl.Attr("addr", conn.RemoteAddr().String()))
 				return
 			}
 			s.l.Error("cant read", sl.Err(err))
+		}
+
+		// check if something was read
+		if n == 0 {
+			continue
+		}
+
+		packet, err := packets.DeserializePacket(buf)
+		if err != nil {
+			s.l.Error("cant deserialize packet", sl.Err(err))
+			continue
 		}
 
 		s.msgCh <- Message{
@@ -164,44 +176,37 @@ func (s *Server) msgLoop() {
 			continue
 		}
 		switch msg.packet.TypeOfPacket {
-		case TypeOfPacketConnectReq:
-			req := msg.packet.Payload.(*ConnectReq)
-			resp := s.handleConnectReq(*req, msg.from)
-			err := s.SendToClient(msg.from, &resp)
+		case packets.TypeOfPacketConnectReq:
+			req := msg.packet.Payload.(packets.ConnectReq)
+			resp := s.handleConnectReq(req, msg.from)
+			err := s.SendToClient(msg.from, resp, packets.TypeOfPacketConnectResp)
 			if err != nil {
 				s.l.Error("cant send to client", sl.Err(err))
 				continue
 			}
-		case TypeOfPacketPlayerPosReq:
-			req := msg.packet.Payload.(*PlayerPosReq)
-			s.handlePlayerPosReq(*req, msg.from)
-		case TypeOfPacketDisconnectReq:
-			req := msg.packet.Payload.(*DisconnectReq)
-			s.handleDisconnect(*req, msg.from)
+		case packets.TypeOfPacketPlayerPosReq:
+			req := msg.packet.Payload.(packets.PlayerPosReq)
+			s.handlePlayerPosReq(req, msg.from)
 		default:
 			// idk
 		}
 	}
 }
 
-func (s *Server) SendToClient(conn net.Conn, payload interface{}) error {
-	var typeOfPacket uint8
-
-	switch payload.(type) {
-	case *ConnectResp:
-		typeOfPacket = TypeOfPacketConnectResp
-	case *NewPlayerConnect:
-		typeOfPacket = TypeOfPacketNewPlayerConnect
-	default:
-		return ErrInvalidType
-	}
-
-	packet := Packet{
+// SendToClient sends a packet created from payload and typeOfPacket to a client.
+func (s *Server) SendToClient(conn net.Conn, payload interface{}, typeOfPacket byte) error {
+	packet := packets.Packet{
 		TypeOfPacket: typeOfPacket,
 		Payload:      payload,
 	}
 
-	err := packet.Serialize(conn)
+	data, err := packets.SerializePacket(packet)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Write(data)
+
 	return err
 }
 
@@ -214,6 +219,25 @@ func (s *Server) connClose(conn net.Conn) {
 	s.save.Players[pl.Username] = pl
 	s.l.Debug("Saved player", sl.Attr("username", pl.Username), sl.Attr("id", fmt.Sprint(pl.UserID)))
 	delete(s.playerMap, conn) // deleting player from map
+
+	// send to all players that player disconnected
+	req := packets.PlayerDisconnect{
+		Player: models.PublicPlayer{
+			Username: pl.Username,
+			UserID:   pl.UserID,
+			Pos:      pl.Pos,
+		},
+	}
+
+	for c := range s.playerMap {
+		if c == conn {
+			continue // skip the player who disconnected
+		}
+		err := s.SendToClient(c, req, packets.TypeOfPacketPlayerDisconnect)
+		if err != nil {
+			s.l.Error("cant send to client about player disconnect", sl.Err(err))
+		}
+	}
 
 	err := conn.Close()
 	if err != nil {

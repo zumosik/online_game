@@ -1,3 +1,5 @@
+CFG ?= "./configs/game/local.yml"
+
 servBinPath = ./bin/server
 gameBinPath = ./bin/game
 clientBinPath = ./bin/cl
@@ -18,7 +20,7 @@ build_game:
 	go build -o $(gameBinPath) ./cmd/game/main.go
 
 run_game:
-	./$(gameBinPath)
+	./$(gameBinPath) --config=$(CFG)
 
 build_client:
 	go build -o $(clientBinPath) ./cmd/game/main.go
