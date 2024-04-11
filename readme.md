@@ -31,7 +31,6 @@ On MacOS you need Xcode or Command Line Tools for Xcode.
 ### Windows:
 coming soon
 
-## Usage example
 
 ## Usage Example
 
