@@ -61,6 +61,8 @@ Remember, this is a community project, so feel free to contribute! If you make a
 
 ## Release History
 
+* 0.1.0
+    * Base multiplayer version 
 * 0.0.1
     * Work in progress
 
